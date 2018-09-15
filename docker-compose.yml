@@ -16,7 +16,7 @@ services:
     restart: always
     environment:
       - FLASK_ENV=${FLASK_ENV}
-      - FLASK_APP=src.app:create_app('development')
+      - FLASK_APP=commentality.app:create_app('development')
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     build: .
