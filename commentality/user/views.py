@@ -32,14 +32,14 @@ def create():
 @blueprint.route('/', methods=['GET'])
 @Auth.auth_required
 def get_all():
-  users = User.get_all_users()
+  users = User.get_all()
   ser_users = user_schema.dump(users, many=True).data
   return custom_response(ser_users, 200)
 
-@blueprint.route('/<int:user_id>', methods=['GET'])
+@blueprint.route('/<int:user_uid>', methods=['GET'])
 @Auth.auth_required
-def get(user_id):
-  user = User.get(user_id)
+def get(user_uid):
+  user = User.get(user_uid)
   if not user:
     return custom_response({'error': 'user not found'}, 404)
 
@@ -54,7 +54,7 @@ def update():
   if error:
     return custom_response(error, 400)
 
-  user = User.get(g.user.get('id'))
+  user = User.get(g.user.get('uid'))
   user.update(data)
   ser_user = user_schema.dump(user).data
   return custom_response(ser_user, 200)
@@ -62,14 +62,14 @@ def update():
 @blueprint.route('/me', methods=['DELETE'])
 @Auth.auth_required
 def delete():
-  user = User.get(g.user.get('id'))
+  user = User.get(g.user.get('uid'))
   user.delete()
   return custom_response({'message': 'deleted'}, 204)
 
 @blueprint.route('/me', methods=['GET'])
 @Auth.auth_required
 def get_me():
-  user = User.get(g.user.get('id'))
+  user = User.get(g.user.get('uid'))
   ser_user = user_schema.dump(user).data
   return custom_response(ser_user, 200)
 
@@ -87,12 +87,10 @@ def login():
   if not user:
     return custom_response({'error': 'invalid credentials'}, 400)
   if not user.check_password(data.get('password')):
-    print('\n\nJAP, tule{}'.format(user))
     return custom_response({'error': 'invalid credentials'}, 400)
-  ser_data = user_schema.dump(user).data
-  token = Auth.generate_token(ser_data.get('id'))
+  user_data = user_schema.dump(user).data
+  token = Auth.generate_token(user_data.get('uid'))
   return custom_response({'jwt_token': token}, 200)
-
 
 
 def custom_response(res, status_code):

@@ -1,5 +1,6 @@
 from neomodel import (StructuredNode, StringProperty, DateTimeProperty,
-    UniqueIdProperty, RelationshipFrom)
+    UniqueIdProperty, RelationshipFrom, One)
+from commentality.user.models import User
 
 class Comment(StructuredNode):
   uid = UniqueIdProperty()
@@ -7,14 +8,11 @@ class Comment(StructuredNode):
   created_at = DateTimeProperty(default_now=True)
   modified_at = DateTimeProperty(default_now=True)
 
-  owner = RelationshipFrom('commentality.comment.models.User', 'OWNS')
-
-  def __init__(self, data):
-    self.contents = data.get('contents')
-    self.owner = data.get('owner')
+  owner = RelationshipFrom('commentality.comment.models.User', 'OWNS',
+                           cardinality=One)
 
   @staticmethod
-  def get_all_comments():
+  def get_all():
     return Comment.nodes
 
   @staticmethod
@@ -22,4 +20,4 @@ class Comment(StructuredNode):
     return Comment.nodes.get_or_none(uid=uid)
 
   def __repr__(self):
-    return '<Comment {}>'.format(self.id)
+    return '<Comment {}>'.format(self.uid)

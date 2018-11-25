@@ -12,27 +12,22 @@ class User(StructuredNode):
 
   comments = RelationshipTo('commentality.comment.models.Comment', 'OWNS')
 
-  def __init__(self, name, email, **kwargs):
-    StructuredNode.__init__(self, name=name, email=email, **kwargs)
-
   def set_password(self, password):
     self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
   def check_password(self, value):
     check = bcrypt.check_password_hash(self.password, value)
-    print('check is: {})'.format(check))
-    # print('check is: {} ({}, {})'.format(check, self.password, value))
     return check
 
   def __repr__(self):
     return '<User({name!r})>'.format(name=self.name)
 
   @staticmethod
-  def get_all_users():
+  def get_all():
     return User.nodes
 
   @staticmethod
-  def get_one_user(uid):
+  def get(uid):
     return User.nodes.get_or_none(uid=uid)
 
   @staticmethod

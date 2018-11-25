@@ -1,6 +1,7 @@
 from flask import request, g, Blueprint, json, Response
 from commentality.authentication import Auth
 from .models import Comment
+from ..user.models import User
 from .serializers import comment_schema
 
 blueprint = Blueprint('comment', __name__)
@@ -9,24 +10,31 @@ blueprint = Blueprint('comment', __name__)
 @Auth.auth_required
 def create():
   req_data = request.get_json()
-  req_data['owner_id'] = g.user.get('id')
   data, error = comment_schema.load(req_data)
   if error:
     return custom_response(error, 400)
-  comment = comment(data)
+
+  # Create and save comment
+  comment = Comment(contents=data['contents'])
   comment.save()
+
+  # Connect owner
+  owner_id = g.user.get('uid')
+  owner = User.get(owner_id)
+  comment.owner.connect(owner)
+
   data = comment_schema.dump(comment).data
   return custom_response(data, 201)
 
 @blueprint.route('/', methods=['GET'])
 def get_all():
-  comments = comment.get_all_blogcomments()
+  comments = Comment.get_all()
   data = comment_schema.dump(comments, many=True).data
   return custom_response(data, 200)
 
 @blueprint.route('/<int:comment_id>', methods=['GET'])
 def get_one(comment_id):
-  comment = comment.get_one_blogcomment(comment_id)
+  comment = Comment.get(comment_id)
   if not comment:
     return custom_response({'error': 'comment not found'}, 404)
   data = comment_schema.dump(comment).data
@@ -36,11 +44,11 @@ def get_one(comment_id):
 @Auth.auth_required
 def update(comment_id):
   req_data = request.get_json()
-  comment = comment.get_one_blogcomment(comment_id)
+  comment = Comment.get(comment_id)
   if not comment:
     return custom_response({'error': 'comment not found'}, 404)
   data = comment_schema.dump(comment).data
-  if data.get('owner_id') != g.user.get('id'):
+  if data.get('owner_id') != g.user.get('uid'):
     return custom_response({'error': 'permission denied'}, 400)
 
   data, error = comment_schema.load(req_data, partial=True)
@@ -54,11 +62,11 @@ def update(comment_id):
 @blueprint.route('/<int:comment_id>', methods=['DELETE'])
 @Auth.auth_required
 def delete(comment_id):
-  comment = comment.get_one_blogcomment(comment_id)
+  comment = Comment.get(comment_id)
   if not comment:
     return custom_response({'error': 'comment not found'}, 404)
   data = comment_schema.dump(comment).data
-  if data.get('owner_id') != g.user.get('id'):
+  if data.get('owner_id') != g.user.get('uid'):
     return custom_response({'error': 'permission denied'}, 400)
 
   comment.delete()
