@@ -1,8 +1,9 @@
+import neomodel
 from flask import Flask
-from commentality.extensions import db, bcrypt, migrate, cors
 
+from commentality.extensions import bcrypt, cors, init_db
 from commentality.config import app_config
-from commentality import user, post
+from commentality import user, comment
 
 def create_app(env_name):
   app = Flask(__name__)
@@ -18,13 +19,10 @@ def create_app(env_name):
   return app
 
 def register_extensions(app):
-  db.init_app(app)
+  init_db(app)
   bcrypt.init_app(app)
-  migrate.init_app(app, db)
+  cors.init_app(app)
 
 def register_blueprints(app):
-  db.init_app(app)
-  bcrypt.init_app(app)
-  migrate.init_app(app, db)
   app.register_blueprint(user.views.blueprint, url_prefix='/api/v1/users')
-  app.register_blueprint(post.views.blueprint, url_prefix='/api/v1/posts')
+  app.register_blueprint(comment.views.blueprint, url_prefix='/api/v1/comments')

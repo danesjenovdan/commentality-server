@@ -21,11 +21,12 @@ def create():
   user = User(
     name=data.get('name'),
     email=data.get('email'),
-    password=data.get('password')
   )
+
+  user.set_password(password=data.get('password'))
   user.save()
-  ser_data = user_schema.dump(user).data
-  token = Auth.generate_token(ser_data.get('id'))
+  user_data = user_schema.dump(user).data
+  token = Auth.generate_token(user_data.get('uid'))
   return custom_response({'jwt_token': token}, 201)
 
 @blueprint.route('/', methods=['GET'])
@@ -85,7 +86,8 @@ def login():
   user = User.get_user_by_email(data.get('email'))
   if not user:
     return custom_response({'error': 'invalid credentials'}, 400)
-  if not user.check_hash(data.get('password')):
+  if not user.check_password(data.get('password')):
+    print('\n\nJAP, tule{}'.format(user))
     return custom_response({'error': 'invalid credentials'}, 400)
   ser_data = user_schema.dump(user).data
   token = Auth.generate_token(ser_data.get('id'))

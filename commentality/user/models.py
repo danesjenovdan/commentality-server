@@ -1,42 +1,40 @@
-import datetime as dt
-from commentality.extensions import db, bcrypt
+from commentality.extensions import bcrypt
+from neomodel import (StructuredNode, StringProperty, DateTimeProperty,
+    UniqueIdProperty, RelationshipTo, EmailProperty)
 
-class User(db.Model):
-  __tablename__ = 'users'
-  id = db.Column(db.Integer, primary_key=True)
-  name = db.Column(db.String(128), unique=True, nullable=False)
-  email = db.Column(db.String(128), unique=True, nullable=False)
-  password = db.Column(db.Binary(128), nullable=False)
-  created_at = db.Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
-  modified_at = db.Column(db.DateTime, nullable=False, default=dt.datetime.utcnow)
-  posts = db.relationship('Post', backref='users', lazy=True)
+class User(StructuredNode):
+  uid = UniqueIdProperty()
+  name = StringProperty(required=True)
+  email = EmailProperty(required=True, unique_index=True)
+  password = StringProperty()
+  created_at = DateTimeProperty(default_now=True)
+  modified_at = DateTimeProperty(default_now=True)
 
-  def __init__(self, name, email, password=None, **kwargs):
-    db.Model.__init__(self, name=name, email=email, **kwargs)
-    if password:
-      self.set_password(password)
-    else:
-      self.password = None
+  comments = RelationshipTo('commentality.comment.models.Comment', 'OWNS')
+
+  def __init__(self, name, email, **kwargs):
+    StructuredNode.__init__(self, name=name, email=email, **kwargs)
 
   def set_password(self, password):
-    self.password = bcrypt.generate_password_hash(password)
+    self.password = bcrypt.generate_password_hash(password).decode('utf-8')
 
   def check_password(self, value):
-    return bcrypt.check_password_hash(self.password, value)
+    check = bcrypt.check_password_hash(self.password, value)
+    print('check is: {})'.format(check))
+    # print('check is: {} ({}, {})'.format(check, self.password, value))
+    return check
 
   def __repr__(self):
     return '<User({name!r})>'.format(name=self.name)
 
   @staticmethod
   def get_all_users():
-    return User.query.all()
+    return User.nodes
 
   @staticmethod
-  def get_one_user(id):
-    return User.query.get(id)
+  def get_one_user(uid):
+    return User.nodes.get_or_none(uid=uid)
 
   @staticmethod
-  def get_user_by_email(value):
-    return User.query.filter_by(email=value).first()
-
-
+  def get_user_by_email(email):
+    return User.nodes.get_or_none(email=email)

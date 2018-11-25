@@ -1,5 +1,5 @@
 from marshmallow import fields, Schema
-from commentality.post.serializers import PostSchema
+from commentality.comment.serializers import CommentSchema
 
 class UserSchema(Schema):
   id = fields.Int(dump_only=True)
@@ -8,7 +8,7 @@ class UserSchema(Schema):
   password = fields.Str(required=True, load_only=True)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
-  posts = fields.Nested(PostSchema, many=True)
+  comments = fields.Nested(CommentSchema, many=True)
 
 user_schema = UserSchema()
 user_schemas = UserSchema(many=True)
