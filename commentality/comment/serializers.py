@@ -5,7 +5,6 @@ class CommentSchema(Schema):
   contents = fields.Str(required=True)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
-  owner = fields.Nested('commentality.user.serializers.UserSchema',
-                        exclude=('comments', ), dump_only=True)
+  owner = fields.Function(lambda obj: obj.owner[0].name)
 
 comment_schema = CommentSchema()
