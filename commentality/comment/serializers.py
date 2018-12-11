@@ -1,10 +1,10 @@
-from marshmallow import fields, Schema
+from marshmallow import fields
 
-class CommentSchema(Schema):
-  uid = fields.Str(dump_only=True)
+from commentality.base import BaseSchema
+
+
+class CommentSchema(BaseSchema):
   contents = fields.Str(required=True)
-  created_at = fields.DateTime(dump_only=True)
-  modified_at = fields.DateTime(dump_only=True)
   owner = fields.Function(lambda obj: obj.owner[0].name)
 
 comment_schema = CommentSchema()

@@ -1,21 +1,12 @@
-from neomodel import (StructuredNode, StringProperty, DateTimeProperty,
-    UniqueIdProperty, RelationshipTo, One)
+from neomodel import (StringProperty, RelationshipTo, One)
 
-class Comment(StructuredNode):
-  uid = UniqueIdProperty()
+from commentality.base import BaseModel
+
+
+class Comment(BaseModel):
   contents = StringProperty(required=True)
-  created_at = DateTimeProperty(default_now=True)
-  modified_at = DateTimeProperty(default_now=True)
-
   owner = RelationshipTo('commentality.user.models.User', 'OWNED_BY', cardinality=One)
-
-  @staticmethod
-  def get_all():
-    return Comment.nodes
-
-  @staticmethod
-  def get_one_comment(uid):
-    return Comment.nodes.get_or_none(uid=uid)
+  article = RelationshipTo('commentality.article.models.Article', 'POSTED_ON', cardinality=One)
 
   def __repr__(self):
     return '<Comment {}>'.format(self.uid)
