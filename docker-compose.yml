@@ -2,7 +2,7 @@ version: '3'
 services:
   neo4j:
     restart: always
-    image: neo4j:3.4
+    image: neo4j:3.5
     volumes:
       - neo4j-data:/data
     ports:
