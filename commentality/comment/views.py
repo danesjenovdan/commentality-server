@@ -1,8 +1,9 @@
 from flask import request, g, Blueprint, json, Response
-from commentality.authentication import Auth
-from .models import Comment
-from ..user.models import User
-from .serializers import comment_schema
+from authentication import Auth
+from comment.models import Comment
+from user.models import User
+from article.models import Article
+from comment.serializers import comment_schema
 
 blueprint = Blueprint('comment', __name__)
 
@@ -22,6 +23,13 @@ def create():
   owner_id = g.user.get('uid')
   owner = User.get(owner_id)
   comment.owner.connect(owner)
+
+  article_external_id = data['article']
+  article = Article.get_by_external_id(article_external_id)
+  if not article:
+    article = Article(external_id=article_external_id)
+    article.save()
+  comment.article.connect(article)
 
   data = comment_schema.dump(comment).data
   return custom_response(data, 201)

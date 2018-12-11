@@ -14,14 +14,14 @@ services:
     restart: always
     environment:
       - FLASK_ENV=${FLASK_ENV}
-      - FLASK_APP=commentality.app:create_app('development')
+      - FLASK_APP=app:create_app('development')
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
     build: .
     ports:
       - 5000:5000
     volumes:
-      - .:/app
+      - ./commentality:/app
     depends_on:
       - neo4j
     entrypoint: ["flask", "run", "--host=0.0.0.0"]

@@ -1,7 +1,7 @@
 from flask import request, json, Response, Blueprint, g
-from commentality.authentication import Auth
-from .models import User
-from .serializers import user_schema
+from authentication import Auth
+from user.models import User
+from user.serializers import user_schema
 
 blueprint = Blueprint('user', __name__)
 

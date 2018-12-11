@@ -1,14 +1,26 @@
-from neomodel import (StringProperty, EmailProperty, RelationshipFrom)
+from neomodel import (StructuredNode, StringProperty, EmailProperty,
+  RelationshipFrom, UniqueIdProperty, DateTimeProperty)
 
-from commentality.extensions import bcrypt
-from commentality.base import BaseModel
+from extensions import bcrypt
 
 
-class User(BaseModel):
+class User(StructuredNode):
+  uid = UniqueIdProperty()
+  created_at = DateTimeProperty(default_now=True)
+  modified_at = DateTimeProperty(default_now=True)
+
   name = StringProperty(required=True)
   email = EmailProperty(required=True, unique_index=True)
   password = StringProperty()
-  comments = RelationshipFrom('commentality.comment.models.Comment', 'OWNED_BY')
+  comments = RelationshipFrom('comment.models.Comment', 'OWNED_BY')
+
+  @staticmethod
+  def get_all():
+    return User.nodes
+
+  @staticmethod
+  def get(uid):
+    return User.nodes.get_or_none(uid=uid)
 
   def set_password(self, password):
     self.password = bcrypt.generate_password_hash(password).decode('utf-8')

@@ -1,9 +1,10 @@
 import neomodel
 from flask import Flask
 
-from commentality.extensions import bcrypt, cors, init_db
-from commentality.config import app_config
-from commentality import user, comment
+from extensions import bcrypt, cors, init_db
+from config import app_config
+import user
+import comment
 
 def create_app(env_name):
   app = Flask(__name__)

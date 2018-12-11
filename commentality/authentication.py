@@ -4,7 +4,7 @@ import os
 import datetime
 from flask import json, Response, request, g
 from functools import wraps
-from commentality.user.models import User
+from user.models import User
 
 
 class Auth():
