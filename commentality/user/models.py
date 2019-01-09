@@ -1,8 +1,9 @@
 from neomodel import (StructuredNode, StringProperty, EmailProperty,
-  RelationshipFrom, UniqueIdProperty, DateTimeProperty)
+  RelationshipFrom, UniqueIdProperty, DateTimeProperty, RelationshipTo)
 
 from extensions import bcrypt
 
+from vote import VoteRelationship
 
 class User(StructuredNode):
   uid = UniqueIdProperty()
@@ -13,6 +14,7 @@ class User(StructuredNode):
   email = EmailProperty(required=True, unique_index=True)
   password = StringProperty()
   comments = RelationshipFrom('comment.models.Comment', 'OWNED_BY')
+  votes = RelationshipTo('comment.models.Comment', 'VOTED_FOR', model=VoteRelationship)
 
   @staticmethod
   def get_all():

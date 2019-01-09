@@ -40,7 +40,7 @@ def get_all():
   data = comment_schema.dump(comments, many=True).data
   return custom_response(data, 200)
 
-@blueprint.route('/<int:comment_id>', methods=['GET'])
+@blueprint.route('/<comment_id>', methods=['GET'])
 def get_one(comment_id):
   comment = Comment.get(comment_id)
   if not comment:
@@ -48,7 +48,7 @@ def get_one(comment_id):
   data = comment_schema.dump(comment).data
   return custom_response(data, 200)
 
-@blueprint.route('/<int:comment_id>', methods=['PUT'])
+@blueprint.route('/<comment_id>', methods=['PUT'])
 @Auth.auth_required
 def update(comment_id):
   req_data = request.get_json()
@@ -67,7 +67,7 @@ def update(comment_id):
   data = comment_schema.dump(comment).data
   return custom_response(data, 200)
 
-@blueprint.route('/<int:comment_id>', methods=['DELETE'])
+@blueprint.route('/<comment_id>', methods=['DELETE'])
 @Auth.auth_required
 def delete(comment_id):
   comment = Comment.get(comment_id)
@@ -80,6 +80,31 @@ def delete(comment_id):
   comment.delete()
   return custom_response({'message': 'deleted'}, 204)
 
+@blueprint.route('/vote/<comment_id>', methods=['POST'])
+@Auth.auth_required
+def vote(comment_id):
+  comment = Comment.get(comment_id)
+  if not comment:
+    return custom_response({'error': 'comment not found'}, 404)
+
+  voter_id = g.user.get('uid')
+  voter = User.get(voter_id)
+
+  vote_type = request.get_json().get('type')
+  valid_vote_types = ['like', 'dislike', 'meh']
+
+  if not vote_type or vote_type not in valid_vote_types :
+    return custom_response({'error': 'invalid vote'}, 404)
+
+  existing_vote = comment.voters.relationship(voter)
+  if existing_vote:
+    existing_vote.type = vote_type
+    existing_vote.save()
+  else:
+    comment.voters.connect(voter, {'type': vote_type})
+
+  data = comment_schema.dump(comment).data
+  return custom_response(data, 201)
 
 def custom_response(res, status_code):
   return Response(
