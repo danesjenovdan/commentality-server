@@ -11,13 +11,13 @@ class CommentSchema(Schema):
   article_external_id = fields.Function(
     lambda obj: obj.article[0].external_id,
   )
-  votes = fields.Method(serialize='get_votes', dump_only=True)
+  vote_count = fields.Method(serialize='get_vote_count', dump_only=True)
 
-  def get_votes(self, obj):
-    votes = { 'like': [], 'meh': [], 'dislike': [] }
+  def get_vote_count(self, obj):
+    votes = { 'like': 0, 'meh': 0, 'dislike': 0 }
     for voter in obj.voters:
       vote = obj.voters.relationship(voter)
-      votes[vote.type].append(voter.uid)
+      votes[vote.type] += 1
     return votes
 
 comment_schema = CommentSchema()
