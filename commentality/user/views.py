@@ -1,5 +1,6 @@
-from flask import request, json, Response, Blueprint, g
+from flask import request, Blueprint, g
 from authentication import Auth
+from common import custom_response
 from user.models import User
 from user.serializers import user_schema
 
@@ -91,11 +92,3 @@ def login():
   serialized_data = user_schema.dump(user).data
   token = Auth.generate_token(serialized_data.get('uid'))
   return custom_response({'jwt_token': token}, 200)
-
-
-def custom_response(res, status_code):
-  return Response(
-    mimetype="application/json",
-    response=json.dumps(res),
-    status=status_code
-  )

@@ -8,8 +8,9 @@ class CommentSchema(Schema):
 
   contents = fields.Str(required=True)
   owner = fields.Function(lambda obj: obj.owner[0].name)
-  article = fields.Number(load_only=True, required=True)
-  article_external_id = fields.Function(lambda obj: obj.article[0].external_id)
+  article_external_id = fields.Function(
+    lambda obj: obj.article[0].external_id,
+  )
   voters = fields.Method('get_voters')
 
   def get_voters(self, obj):

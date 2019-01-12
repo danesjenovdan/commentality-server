@@ -1,5 +1,6 @@
-from flask import request, g, Blueprint, json, Response
+from flask import request, g, Blueprint
 from authentication import Auth
+from common import custom_response
 from comment.models import Comment
 from user.models import User
 from article.models import Article
@@ -24,7 +25,7 @@ def create():
   owner = User.get(owner_id)
   comment.owner.connect(owner)
 
-  article_external_id = data['article']
+  article_external_id = data['article_external_id']
   article = Article.get_by_external_id(article_external_id)
   if not article:
     article = Article(external_id=article_external_id)
@@ -105,11 +106,4 @@ def vote(comment_id):
 
   data = comment_schema.dump(comment).data
   return custom_response(data, 201)
-
-def custom_response(res, status_code):
-  return Response(
-    mimetype="application/json",
-    response=json.dumps(res),
-    status=status_code
-  )
 
