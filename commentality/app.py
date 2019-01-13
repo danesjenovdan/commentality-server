@@ -4,6 +4,7 @@ from flask import Flask
 from extensions import bcrypt, cors, init_db
 from config import app_config
 import user
+import article
 import comment
 
 def create_app(env_name):
@@ -25,5 +26,6 @@ def register_extensions(app):
   cors.init_app(app)
 
 def register_blueprints(app):
-  app.register_blueprint(user.views.blueprint, url_prefix='/api/v1/users')
+  app.register_blueprint(article.views.blueprint, url_prefix='/api/v1/articles')
   app.register_blueprint(comment.views.blueprint, url_prefix='/api/v1/comments')
+  app.register_blueprint(user.views.blueprint, url_prefix='/api/v1/users')
