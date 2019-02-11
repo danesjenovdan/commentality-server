@@ -1,4 +1,4 @@
-from flask import request, Blueprint, g, session
+from flask import request, Blueprint, g
 from authentication import Auth
 from common import custom_response
 from user.models import User
@@ -25,8 +25,18 @@ def get_code():
   if data['number']:
     app.app.logger.info('Got number: %s, sending verification code.' % data['number'])
     verification_code = otp.send_confirmation_code(data['number'])
-    session['number'] = data['number']
-    session['verification_code'] = verification_code
+
+    user_in_db = User.get_by_number(data['number'])
+    if not user_in_db:
+      user = User(
+        number = data['number']
+      )
+      user.save()
+    else:
+      user = user_in_db
+  
+  user.code = verification_code
+  user.save()
   
   return custom_response({
     'status': 'Sent verification code to %s' % data['number']
@@ -40,16 +50,14 @@ def verify():
   if error:
     return custom_response(error, 400)
 
-  if session['verification_code'] == req_data['code']:
-    user_in_db = User.get_by_number(session['number'])
+  user_by_code = User.get_by_code(str(req_data['code']))
 
-    if not user_in_db:
-      user = User(
-        number = session['number']
-      )
-      user.save()
-    else:
-      user = user_in_db
+  if user_by_code and user_by_code.number == str(req_data['number']):
+    user = user_by_code
+
+    # destroy code
+    user.code = ''
+    user.save()
 
     serialized_data = user_schema.dump(user).data
     token = Auth.generate_token(serialized_data.get('uid'))
@@ -57,7 +65,6 @@ def verify():
       'jwt_token': token,
       'uid': serialized_data.get('uid'),
     }, 201)
-
   else:
     message = {'error': 'Wrong verification code.'}
     return custom_response(message, 400)
