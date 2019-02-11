@@ -4,27 +4,33 @@ from common import custom_response
 from user.models import User
 from user.serializers import user_schema
 
+# logging
+import app
+
 blueprint = Blueprint('user', __name__)
 
 @blueprint.route('/', methods=['POST'])
-def create():
+def create_or_login():
   req_data = request.get_json()
   data, error = user_schema.load(req_data)
+
+  app.app.logger.info(req_data)
+  app.app.logger.info(data)
 
   if error:
     return custom_response(error, 400)
 
-  user_in_db = User.get_by_email(data.get('email'))
+  user_in_db = User.get(data.get('uid'))
+
   if user_in_db:
+    # TODO log user in
     message = {'error': 'User already exists'}
     return custom_response(message, 400)
 
   user = User(
-    name=data.get('name'),
-    email=data.get('email'),
+    number = data.get('number'), # TODO SANITIZE
   )
 
-  user.set_password(password=data.get('password'))
   user.save()
   serialized_data = user_schema.dump(user).data
   token = Auth.generate_token(serialized_data.get('uid'))

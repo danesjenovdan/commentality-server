@@ -5,6 +5,9 @@ class Config(object):
   TESTING = False
   JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
   DATABASE_URL = os.getenv('DATABASE_URL')
+  TWILIO_ACCOUNT_SID = ''
+  TWILIO_AUTH_TOKEN = ''
+  TWILIO_NUMBER = ''
 class Development(Config):
   DEBUG = True
 

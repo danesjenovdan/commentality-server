@@ -5,3 +5,4 @@ ipdb==0.11
 marshmallow==2.16.3
 neomodel==3.2.9
 PyJWT==1.7.1
+twilio==6.19.2
