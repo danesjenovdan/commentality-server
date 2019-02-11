@@ -1,4 +1,4 @@
-from neomodel import (StructuredNode, IntegerProperty,
+from neomodel import (StructuredNode, StringProperty,
   RelationshipFrom, UniqueIdProperty, DateTimeProperty, RelationshipTo)
 
 from extensions import bcrypt
@@ -10,7 +10,8 @@ class User(StructuredNode):
   created_at = DateTimeProperty(default_now=True)
   modified_at = DateTimeProperty(default_now=True)
 
-  number = IntegerProperty()
+  number = StringProperty()
+  code = StringProperty()
   comments = RelationshipFrom('comment.models.Comment', 'OWNED_BY')
   votes = RelationshipTo('comment.models.Comment', 'VOTED_FOR', model=VoteRelationship)
 
@@ -25,6 +26,10 @@ class User(StructuredNode):
   @staticmethod
   def get_by_number(number):
     return User.nodes.get_or_none(number=number)
+  
+  @staticmethod
+  def get_by_code(code):
+    return User.nodes.get_or_none(code=code)
 
   def __repr__(self):
     return '<User({uid!r})>'.format(uid=self.uid)
