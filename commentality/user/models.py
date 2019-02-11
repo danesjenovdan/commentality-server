@@ -21,6 +21,10 @@ class User(StructuredNode):
   @staticmethod
   def get(uid):
     return User.nodes.get_or_none(uid=uid)
+  
+  @staticmethod
+  def get_by_number(number):
+    return User.nodes.get_or_none(number=number)
 
   def __repr__(self):
     return '<User({uid!r})>'.format(uid=self.uid)

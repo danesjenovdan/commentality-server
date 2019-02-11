@@ -19,6 +19,7 @@ def register_blueprints(app):
 
 app = Flask(__name__)
 
+app.secret_key = 'my secret key' # TODO
 app.config.from_object(app_config['development'])
 
 register_extensions(app)

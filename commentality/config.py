@@ -3,6 +3,7 @@ import os
 class Config(object):
   DEBUG = False
   TESTING = False
+  SESSION_TYPE = 'filesystem'
   JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY')
   DATABASE_URL = os.getenv('DATABASE_URL')
   TWILIO_ACCOUNT_SID = ''
