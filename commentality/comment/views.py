@@ -99,8 +99,9 @@ def vote(comment_id):
 
   existing_vote = comment.voters.relationship(voter)
   if existing_vote:
-    existing_vote.type = vote_type
-    existing_vote.save()
+    # existing_vote.type = vote_type
+    # existing_vote.save()
+    return custom_response({'error': 'already voted'}, 404)
   else:
     comment.voters.connect(voter, {'type': vote_type})
 
