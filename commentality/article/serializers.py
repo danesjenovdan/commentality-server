@@ -7,7 +7,13 @@ class ArticleSchema(Schema):
   modified_at = fields.DateTime(dump_only=True)
 
   title = fields.Str(required=True)
+  external_id = fields.Str(required=True)
+  owner = fields.Function(lambda obj: obj.owner[0].name)
   comments = fields.Nested('comment.serializers.CommentSchema',
                            many=True, exclude=('owner', ), dump_only=True)
 
+  can_vote = fields.Boolean(required=False)
+  can_comment = fields.Boolean(required=False)
+
 article_schema = ArticleSchema()
+articles_schema = ArticleSchema(many=True)

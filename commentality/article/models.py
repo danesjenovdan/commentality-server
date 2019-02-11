@@ -1,5 +1,5 @@
 from neomodel import (StructuredNode, StringProperty, RelationshipFrom,
-  UniqueIdProperty, DateTimeProperty, One)
+  UniqueIdProperty, DateTimeProperty, One, RelationshipTo, BooleanProperty)
 
 class Article(StructuredNode):
   uid = UniqueIdProperty()
@@ -7,7 +7,12 @@ class Article(StructuredNode):
   modified_at = DateTimeProperty(default_now=True)
 
   external_id = StringProperty(required=True)
+  title = StringProperty(required=True)
+  owner = RelationshipTo('user.models.User', 'OWNED_BY', cardinality=One)
   comments = RelationshipFrom('comment.models.Comment', 'POSTED_ON')
+
+  can_vote = BooleanProperty(default=True)
+  can_comment = BooleanProperty(default=True)
 
   @staticmethod
   def get_all():

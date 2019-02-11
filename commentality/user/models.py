@@ -16,6 +16,7 @@ class User(StructuredNode):
   code = StringProperty()
   comments = RelationshipFrom('comment.models.Comment', 'OWNED_BY')
   votes = RelationshipTo('comment.models.Comment', 'VOTED_FOR', model=VoteRelationship)
+  articles = RelationshipFrom('article.models.Article', 'OWNED_BY')
 
   @staticmethod
   def get_all():
