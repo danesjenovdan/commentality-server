@@ -5,6 +5,7 @@ from article.models import Article
 from user.models import User
 from article.serializers import article_schema, articles_schema, authenthicated_article_schema
 
+
 blueprint = Blueprint('article', __name__)
 
 @blueprint.route('/<uid>', methods=['GET'])
@@ -15,7 +16,6 @@ def get_one(uid):
 
   token = request.headers.get('api-token')
   data = Auth.decode_token(token)
-  print(data, data['data'].keys(), file=sys.stderr)
   if 'user_uid' in data['data'].keys():
     user_id = data['data']['user_uid']
     user = User.get(user_id)
@@ -24,6 +24,9 @@ def get_one(uid):
     
   if user:
     data = authenthicated_article_schema.dump(article).data
+    # set if user voted
+    for comment in data['comments']:
+      comment['my_vote'] = True if user_id in comment['my_vote'] else False
   else:
     data = article_schema.dump(article).data
   return custom_response(data, 200)
