@@ -9,6 +9,11 @@ from user import otp
 # logging
 import app
 
+#  encryption
+from config import app_config
+import hmac
+import hashlib
+
 blueprint = Blueprint('user', __name__)
 
 @blueprint.route('/', methods=['POST'])
@@ -17,42 +22,46 @@ def get_code():
     Takes number and creates or logs user in.
   '''
   req_data = request.get_json()
-  data, error = user_schema.load(req_data)
+  # TODO consider validating input
+  # data, error = user_schema.load(req_data)
 
-  if error:
-    return custom_response(error, 400)
+  # if error:
+  #   return custom_response(error, 400)
 
-  if data['number']:
-    app.app.logger.info('Got number: %s, sending verification code.' % data['number'])
-    verification_code = otp.send_confirmation_code(data['number'])
+  if req_data['number']:
+    app.app.logger.info('Got number: %s, sending verification code.' % req_data['number']) # TODO remove so number isn't stored in logs
+    verification_code = otp.send_confirmation_code(req_data['number'])
 
-    user_in_db = User.get_by_number(data['number'])
+    user_in_db = User.get_by_number(req_data['number'])
     if not user_in_db:
-      user = User(
-        number = data['number']
-      )
-      user.save()
+      user = User()
+      user.set_number(req_data['number'])
     else:
       user = user_in_db
   
   user.code = verification_code
+
+  app.app.logger.info('Saving user:\n%s\n%s\n\n' % (str(user.number), str(user.code)))
+
   user.save()
   
   return custom_response({
-    'status': 'Sent verification code to %s' % data['number']
+    'status': 'Sent verification code to %s' % req_data['number']
   }, 200)
 
 @blueprint.route('/verify', methods=['POST'])
 def verify():
   req_data = request.get_json()
-  data, error = user_schema.load(req_data)
+  # TODO consider verifying
+  # data, error = user_schema.load(req_data)
 
-  if error:
-    return custom_response(error, 400)
+  # if error:
+  #   return custom_response(error, 400)
 
+  app.app.logger.info('Getting user:\n%s\n%s\n\n' % (str(req_data['number']), str(req_data['code'])))
   user_by_code = User.get_by_code(str(req_data['code']))
 
-  if user_by_code and user_by_code.number == str(req_data['number']):
+  if user_by_code and user_by_code.check_number(req_data['number']):
     user = user_by_code
 
     # destroy code

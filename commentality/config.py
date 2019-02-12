@@ -11,8 +11,10 @@ class Config(object):
   TWILIO_NUMBER = ''
 class Development(Config):
   DEBUG = True
+  HMAC_SECRET = 'no secrets'
 
 class Production(Config):
+  HMAC_SECRET = 'please set a secret'
   pass
 
 app_config = {
