@@ -3,18 +3,29 @@ from common import custom_response
 from authentication import Auth
 from article.models import Article
 from user.models import User
-from article.serializers import article_schema, articles_schema
+from article.serializers import article_schema, articles_schema, authenthicated_article_schema
 
 blueprint = Blueprint('article', __name__)
 
-@blueprint.route('/<article_external_id>', methods=['GET'])
-def get_one(article_external_id):
-  article = Article.get_by_external_id(article_external_id)
+@blueprint.route('/<uid>', methods=['GET'])
+def get_one(uid):
+  article = Article.get(uid)
   if not article:
-    article = Article(external_id=article_external_id)
-    article.save()
+    return custom_response({'error': 'article not found'}, 404)
 
-  data = article_schema.dump(article).data
+  token = request.headers.get('api-token')
+  data = Auth.decode_token(token)
+  print(data, data['data'].keys(), file=sys.stderr)
+  if 'user_uid' in data['data'].keys():
+    user_id = data['data']['user_uid']
+    user = User.get(user_id)
+  else:
+    user = None
+    
+  if user:
+    data = authenthicated_article_schema.dump(article).data
+  else:
+    data = article_schema.dump(article).data
   return custom_response(data, 200)
 
 

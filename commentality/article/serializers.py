@@ -15,5 +15,11 @@ class ArticleSchema(Schema):
   can_vote = fields.Boolean(required=False)
   can_comment = fields.Boolean(required=False)
 
+
+class AuthenthicatedArticleSchema(ArticleSchema):
+  comments = fields.Nested('comment.serializers.AuthenticatedCommentSchema',
+                           many=True, exclude=('owner', ), dump_only=True)
+
 article_schema = ArticleSchema()
 articles_schema = ArticleSchema(many=True)
+authenthicated_article_schema = AuthenthicatedArticleSchema()
