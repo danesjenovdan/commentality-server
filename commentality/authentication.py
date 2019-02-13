@@ -64,7 +64,7 @@ class Auth():
           status=401
         )
       token = request.headers.get('api-token')
-      data = self.decode_token(token)
+      data = Auth.decode_token(token)
       if data['error']:
         return Response(
           mimetype="application/json",
