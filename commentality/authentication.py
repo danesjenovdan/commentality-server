@@ -1,4 +1,3 @@
-#src/shared/Authentication
 import jwt
 import os
 import datetime
@@ -31,7 +30,7 @@ class Auth():
       return Response(
         mimetype="application/json",
         response=json.dumps({'error': 'error in generating user token'}),
-        status=400
+        status=500
       )
 
   @staticmethod
@@ -43,13 +42,12 @@ class Auth():
     try:
       payload = jwt.decode(token, os.getenv('JWT_SECRET_KEY'))
       re['data'] = {'user_uid': payload['sub']}
-      return re
     except jwt.ExpiredSignatureError as e1:
       re['error'] = {'message': 'token expired, please login again'}
-      return re
     except jwt.InvalidTokenError:
       re['error'] = {'message': 'Invalid token, please try again with a new token'}
-      return re
+
+    return re
 
   # decorator
   @staticmethod
@@ -63,15 +61,15 @@ class Auth():
         return Response(
           mimetype="application/json",
           response=json.dumps({'error': 'Authentication token is not available, please login to get one'}),
-          status=400
+          status=401
         )
       token = request.headers.get('api-token')
-      data = Auth.decode_token(token)
+      data = self.decode_token(token)
       if data['error']:
         return Response(
           mimetype="application/json",
           response=json.dumps(data['error']),
-          status=400
+          status=401
         )
 
       user_uid = data['data']['user_uid']
@@ -80,7 +78,7 @@ class Auth():
         return Response(
           mimetype="application/json",
           response=json.dumps({'error': 'user does not exist, invalid token'}),
-          status=400
+          status=401
         )
       g.user = {'uid': user_uid}
       return func(*args, **kwargs)
