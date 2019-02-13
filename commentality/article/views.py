@@ -5,6 +5,7 @@ from article.models import Article
 from user.models import User
 from article.serializers import article_schema, articles_schema, authenthicated_article_schema
 
+import app
 
 blueprint = Blueprint('article', __name__)
 
@@ -24,9 +25,9 @@ def get_one(uid):
     
   if user:
     data = authenthicated_article_schema.dump(article).data
-    # set if user voted
-    for comment in data['comments']:
-      comment['my_vote'] = True if user_id in comment['my_vote'] else False
+    # get voted comments
+    results, columns = article.cypher('MATCH (a:Article)<-[:POSTED_ON]-(c)<-[r:VOTED_FOR]-(u:User) WHERE u.uid = "' + user_id + '" AND a.uid = "' + article.uid + '" RETURN c')
+    data['voted'] = [article.inflate(row[0]).uid for row in results]
   else:
     data = article_schema.dump(article).data
   return custom_response(data, 200)
