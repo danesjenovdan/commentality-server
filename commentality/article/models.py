@@ -8,7 +8,7 @@ class Article(StructuredNode):
 
   external_id = StringProperty(required=True)
   title = StringProperty(required=True)
-  owner = RelationshipTo('user.models.User', 'OWNED_BY', cardinality=One)
+  owner = RelationshipTo('property.models.MediaProperty', 'OWNED_BY', cardinality=One)
   comments = RelationshipFrom('comment.models.Comment', 'POSTED_ON')
 
   can_vote = BooleanProperty(default=True)

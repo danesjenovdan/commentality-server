@@ -1,5 +1,6 @@
 from neomodel import (StructuredNode, StringProperty,
-  RelationshipFrom, UniqueIdProperty, DateTimeProperty, RelationshipTo)
+  RelationshipFrom, UniqueIdProperty, DateTimeProperty, RelationshipTo,
+  BooleanProperty)
 
 from config import app_config
 import hashlib
@@ -14,6 +15,7 @@ class User(StructuredNode):
 
   number = StringProperty()
   code = StringProperty()
+  is_superuser = BooleanProperty(default=False)
   comments = RelationshipFrom('comment.models.Comment', 'OWNED_BY')
   votes = RelationshipTo('comment.models.Comment', 'VOTED_FOR', model=VoteRelationship)
   articles = RelationshipFrom('article.models.Article', 'OWNED_BY')
