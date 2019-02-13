@@ -2,7 +2,6 @@ from neomodel import (StructuredNode, StringProperty,
   RelationshipFrom, UniqueIdProperty, DateTimeProperty, RelationshipTo)
 
 from config import app_config
-import hmac
 import hashlib
 import app
 
@@ -29,7 +28,7 @@ class User(StructuredNode):
   @staticmethod
   def get_by_number(number):
     # TODO stop hardcoding development
-    number_hash = hmac.new(app_config['development'].HMAC_SECRET.encode('utf-8'), str(number).encode('utf-8'), hashlib.sha512).hexdigest()
+    number_hash = hashlib.scrypt(password=str(number).encode('utf-8'), salt=app_config['development'].SECRET_KEY.encode('utf-8'), n=16384, r=8, p=8).hex()
     app.app.logger.info('I am get_by_number, this is my hash:\n%s\n\n' % str(number_hash))
     return User.nodes.get_or_none(number=number_hash)
   
@@ -39,14 +38,13 @@ class User(StructuredNode):
   
   def set_number(self, number):
     # TODO stop hardcoding development
-    number_hash = hmac.new(app_config['development'].HMAC_SECRET.encode('utf-8'), str(number).encode('utf-8'), hashlib.sha512).hexdigest()
-    app.app.logger.info('I am set_number, this is my hash:\n%s\n\n' % str(number_hash))
+    number_hash = hashlib.scrypt(password=str(number).encode('utf-8'), salt=app_config['development'].SECRET_KEY.encode('utf-8'), n=16384, r=8, p=8).hex()
     self.number = number_hash
 
   # currently unused
   def check_number(self, number):
     # TODO stop hardcoding development
-    number_hash = hmac.new(app_config['development'].HMAC_SECRET.encode('utf-8'), str(number).encode('utf-8'), hashlib.sha512).hexdigest()
+    number_hash = hashlib.scrypt(password=str(number).encode('utf-8'), salt=app_config['development'].SECRET_KEY.encode('utf-8'), n=16384, r=8, p=8).hex()
     app.app.logger.info('I am check_number, this is my hash:\n%s\n\n' % str(number_hash))
     return number_hash == self.number
 
