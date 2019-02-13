@@ -78,6 +78,22 @@ def verify():
     message = {'error': 'Wrong verification code.'}
     return custom_response(message, 400)
 
+@blueprint.route('/refresh', methods=['POST'])
+@Auth.auth_required
+def refresh_token():
+  token = request.headers.get('api-token')
+  data = Auth.decode_token(token)
+  user_uid = data['data']['user_uid']
+  # this should always work because user is authorised
+  user = User.get(user_uid)
+
+  serialized_data = user_schema.dump(user).data
+  token = Auth.generate_token(serialized_data.get('uid'))
+  return custom_response({
+    'jwt_token': token,
+    'uid': serialized_data.get('uid'),
+  }, 201)
+
 @blueprint.route('/', methods=['GET'])
 @Auth.auth_required
 def get_all():
