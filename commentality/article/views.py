@@ -64,3 +64,23 @@ def create():
 
   data = article_schema.dump(article).data
   return custom_response(data, 201)
+
+
+@blueprint.route('/<uid>', methods=['PUT'])
+def patch(uid):
+  article = Article.get(uid)
+  if not article:
+    return custom_response({'error': 'article not found'}, 404)
+
+  req_data = request.get_json()
+  data, error = article_schema.load(req_data)
+  if error:
+    return custom_response(error, 400)
+
+  if data.get('owner_id') != g.user.get('uid'):
+    return custom_response({'error': 'permission denied'}, 400)
+
+  article.update(data)
+
+  data = article_schema.dump(article).data
+  return custom_response(data, 200)
