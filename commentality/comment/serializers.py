@@ -7,9 +7,9 @@ class CommentSchema(Schema):
   modified_at = fields.DateTime(dump_only=True)
 
   contents = fields.Str(required=True)
-  owner = fields.Function(lambda obj: obj.owner[0].name)
+  owner = fields.Function(lambda obj: obj.owner.single().name)
   article_uid = fields.Function(
-    lambda obj: obj.article[0].uid,
+    lambda obj: obj.article.single().uid,
   )
   votes = fields.Method(serialize='get_votes', dump_only=True)
 

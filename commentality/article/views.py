@@ -23,12 +23,12 @@ def get_one(uid):
     user = User.get(user_id)
   else:
     user = None
-    
+
   if user:
     data = authenthicated_article_schema.dump(article).data
     # get voted comments
     results, columns = article.cypher('MATCH (a:Article)<-[:POSTED_ON]-(c)<-[r:VOTED_FOR]-(u:User) WHERE u.uid = "' + user_id + '" AND a.uid = "' + article.uid + '" RETURN c')
-    data['voted'] = [article.inflate(row[0]).uid for row in results]
+    data['voted_by_me'] = [article.inflate(row[0]).uid for row in results]
   else:
     data = article_schema.dump(article).data
   return custom_response(data, 200)
