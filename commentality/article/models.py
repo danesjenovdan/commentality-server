@@ -8,8 +8,9 @@ class Article(StructuredNode):
 
   external_id = StringProperty(required=True)
   title = StringProperty(required=True)
-  owner = RelationshipTo('property.models.MediaProperty', 'OWNED_BY', cardinality=One)
-  comments = RelationshipFrom('comment.models.Comment', 'POSTED_ON')
+  owner = RelationshipTo('media_property.models.MediaProperty', 'OWNED_BY', cardinality=One)
+  visible = RelationshipFrom('comment.models.Comment', 'POSTED_ON')
+  hidden = RelationshipFrom('comment.models.Comment', 'HIDDEN_ON')
 
   can_vote = BooleanProperty(default=True)
   can_comment = BooleanProperty(default=True)
@@ -28,3 +29,8 @@ class Article(StructuredNode):
   @staticmethod
   def get_by_external_id(external_id):
     return Article.nodes.get_or_none(external_id=external_id)
+
+  def update(self, data):
+    for name, value in data.items():
+      setattr(self, name, value)
+    self.save()

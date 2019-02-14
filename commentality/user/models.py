@@ -1,12 +1,12 @@
 from neomodel import (StructuredNode, StringProperty,
   RelationshipFrom, UniqueIdProperty, DateTimeProperty, RelationshipTo,
   BooleanProperty)
-
 from config import app_config
 import hashlib
 import app
 
-from vote import VoteRelationship
+from relations.vote import VoteRelationship
+from relations.comment import CommentRelationship
 
 class User(StructuredNode):
   uid = UniqueIdProperty()
@@ -16,9 +16,10 @@ class User(StructuredNode):
   number = StringProperty()
   code = StringProperty()
   is_superuser = BooleanProperty(default=False)
-  comments = RelationshipFrom('comment.models.Comment', 'OWNED_BY')
+  comments = RelationshipFrom('comment.models.Comment', 'OWNED_BY', model=CommentRelationship)
   votes = RelationshipTo('comment.models.Comment', 'VOTED_FOR', model=VoteRelationship)
-  articles = RelationshipFrom('article.models.Article', 'OWNED_BY')
+  media_properties = RelationshipFrom('media_property.models.MediaProperty', 'EDITED_BY')
+  banned_on = RelationshipTo('media_property.models.MediaProperty', 'BANNED_ON')
 
   @staticmethod
   def get_all():

@@ -6,6 +6,8 @@ from config import app_config
 import user
 import article
 import comment
+import media_property
+
 
 def register_extensions(app):
   init_db(app)
@@ -16,6 +18,7 @@ def register_blueprints(app):
   app.register_blueprint(article.views.blueprint, url_prefix='/api/v2/articles')
   app.register_blueprint(comment.views.blueprint, url_prefix='/api/v2/comments')
   app.register_blueprint(user.views.blueprint, url_prefix='/api/v2/users')
+  app.register_blueprint(media_property.views.blueprint, url_prefix='/api/v2/properties')
 
 app = Flask(__name__)
 

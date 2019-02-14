@@ -6,7 +6,7 @@ class MediaPropertySchema(Schema):
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
 
-  name = fields.Str(load_only=True)
+  name = fields.Str()
   articles = fields.Nested('article.serializers.ArticleSchema',
                            many=True, exclude=('owner', ), dump_only=True)
 

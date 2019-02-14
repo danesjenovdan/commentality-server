@@ -3,8 +3,10 @@ from common import custom_response
 from authentication import Auth
 from article.models import Article
 from user.models import User
+from media_property.models import MediaProperty
 from article.serializers import article_schema, articles_schema, authenthicated_article_schema
 
+import app
 
 blueprint = Blueprint('article', __name__)
 
@@ -25,7 +27,7 @@ def get_one(uid):
   if user:
     data = authenthicated_article_schema.dump(article).data
     # set if user voted
-    for comment in data['comments']:
+    for comment in data['visible']:
       comment['my_vote'] = True if user_id in comment['my_vote'] else False
   else:
     data = article_schema.dump(article).data
@@ -33,11 +35,24 @@ def get_one(uid):
 
 
 @blueprint.route('/', methods=['GET'])
-@Auth.auth_required
+@Auth.auth_required # TODO: is superuser
 def get_all():
-  owner_id = g.user.get('uid')
-  owner = User.get(owner_id)
-  articles = owner.articles.all()
+  articles =  Article.nodes.all()
+  data = articles_schema.dump(articles).data
+  return custom_response(data, 200)
+
+
+@blueprint.route('/by_property/<property_uid>', methods=['GET'])
+@Auth.auth_required
+def get_all_by_property(property_uid):
+  user_id = g.user.get('uid')
+  user = User.get(user_id)
+  media_property = MediaProperty.get(property_uid)
+  if not media_property:
+    return custom_response({'error': 'property not found'}, 404)
+  if not media_property.editors.relationship(user):
+    return custom_response({'error': 'permission denied'}, 400)
+  articles =  media_property.articles
   data = articles_schema.dump(articles).data
   return custom_response(data, 200)
 
@@ -50,23 +65,23 @@ def create():
   if error:
     return custom_response(error, 400)
 
+  media_property = MediaProperty.get(data['owner'])
+  if not media_property:
+    return custom_response({'error': 'property not found'}, 404)
   # Create and save article
   article = Article(
     external_id=data['external_id'],
     title = data['title']
   )
   article.save()
-
-  # Connect owner
-  owner_id = g.user.get('uid')
-  owner = User.get(owner_id)
-  article.owner.connect(owner)
+  article.owner.connect(media_property)
 
   data = article_schema.dump(article).data
   return custom_response(data, 201)
 
 
 @blueprint.route('/<uid>', methods=['PUT'])
+@Auth.auth_required
 def patch(uid):
   article = Article.get(uid)
   if not article:
@@ -77,10 +92,34 @@ def patch(uid):
   if error:
     return custom_response(error, 400)
 
-  if data.get('owner_id') != g.user.get('uid'):
+  user_id = g.user.get('uid')
+  app.app.logger.info(user_id)
+  user = User.get(user_id)
+
+  if not article.owner.all()[0].editors.is_connected(user):
     return custom_response({'error': 'permission denied'}, 400)
 
+  data['uid'] = uid
+  data['id'] = article.id
   article.update(data)
 
   data = article_schema.dump(article).data
   return custom_response(data, 200)
+
+
+@blueprint.route('/<uid>', methods=['DELETE'])
+@Auth.auth_required
+def delete(uid):
+  article = Article.get(uid)
+  if not article:
+    return custom_response({'error': 'article not found'}, 404)
+
+  user_id = g.user.get('uid')
+  app.app.logger.info(user_id)
+  user = User.get(user_id)
+
+  if not article.owner.all()[0].editors.is_connected(user):
+    return custom_response({'error': 'permission denied'}, 400)
+
+  article.delete()
+  return custom_response({'message': 'deleted'}, 204)
