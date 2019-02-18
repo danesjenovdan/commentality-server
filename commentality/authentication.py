@@ -83,3 +83,38 @@ class Auth():
       g.user = {'uid': user_uid}
       return func(*args, **kwargs)
     return decorated_auth
+
+  # decorator
+  @staticmethod
+  def superuser_required(func):
+    """
+    Superuser decorator
+    """
+    @wraps(func)
+    def decorated_auth(*args, **kwargs):
+      if 'api-token' not in request.headers:
+        return Response(
+          mimetype="application/json",
+          response=json.dumps({'error': 'Authentication token is not available, please login to get one'}),
+          status=401
+        )
+      token = request.headers.get('api-token')
+      data = Auth.decode_token(token)
+      if data['error']:
+        return Response(
+          mimetype="application/json",
+          response=json.dumps(data['error']),
+          status=401
+        )
+
+      user_uid = data['data']['user_uid']
+      check_user = User.get(user_uid)
+      if not check_user or not check_user.is_superuser:
+        return Response(
+          mimetype="application/json",
+          response=json.dumps({'error': 'user does not exist, invalid token'}),
+          status=401
+        )
+      g.user = {'uid': user_uid}
+      return func(*args, **kwargs)
+    return decorated_auth

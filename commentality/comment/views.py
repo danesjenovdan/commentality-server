@@ -77,7 +77,8 @@ def create():
 
 
 @blueprint.route('/', methods=['GET'])
-def get_all(): # TODO: add is_superuser
+@Auth.superuser_required
+def get_all():
   comments = Comment.get_all()
   data = comment_schema.dump(comments, many=True).data
   return custom_response(data, 200)

@@ -17,8 +17,7 @@ blueprint = Blueprint('property', __name__)
 
 
 @blueprint.route('/', methods=['POST'])
-# TODO: change to is superuser required
-@Auth.auth_required
+@Auth.superuser_required
 def create():
   req_data = request.get_json()
   data, error = media_peroperty_schema.load(req_data)

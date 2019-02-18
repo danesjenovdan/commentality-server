@@ -34,7 +34,7 @@ def get_one(uid):
 
 
 @blueprint.route('/', methods=['GET'])
-@Auth.auth_required # TODO: is superuser
+@Auth.superuser_required
 def get_all():
   articles =  Article.nodes.all()
   data = articles_schema.dump(articles).data
