@@ -4,7 +4,7 @@ from authentication import Auth
 from article.models import Article
 from user.models import User
 from media_property.models import MediaProperty
-from article.serializers import article_schema, articles_schema, authenthicated_article_schema
+from article.serializers import article_schema, articles_schema
 
 import app
 
@@ -24,13 +24,12 @@ def get_one(uid):
   else:
     user = None
 
+  data = article_schema.dump(article).data
   if user:
-    data = authenthicated_article_schema.dump(article).data
     # get voted comments
     results, columns = article.cypher('MATCH (a:Article)<-[:POSTED_ON]-(c)<-[r:VOTED_FOR]-(u:User) WHERE u.uid = "' + user_id + '" AND a.uid = "' + article.uid + '" RETURN c')
     data['voted_by_me'] = [article.inflate(row[0]).uid for row in results]
-  else:
-    data = article_schema.dump(article).data
+
   return custom_response(data, 200)
 
 

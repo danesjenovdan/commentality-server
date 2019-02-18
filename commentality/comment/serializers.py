@@ -21,13 +21,4 @@ class CommentSchema(Schema):
     }
     return votes
 
-
-class AuthenticatedCommentSchema(CommentSchema):
-  my_vote = fields.Method(serialize='get_my_vote', dump_only=True)
-
-  def get_my_vote(self, obj):
-    return [voter.uid for voter in obj.voters]
-
-
 comment_schema = CommentSchema()
-authenticated_comment_schema = AuthenticatedCommentSchema()
