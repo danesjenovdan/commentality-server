@@ -24,7 +24,6 @@ def create():
   if error:
     return custom_response(error, 400)
 
-  # TODO: check if property with this name exists
   # Create and save property
   media_property = MediaProperty(
     name = data['name'],

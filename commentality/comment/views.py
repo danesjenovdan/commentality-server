@@ -30,16 +30,10 @@ def create():
   user_id = g.user.get('uid')
   user = User.get(user_id)
 
-  if not user:
-    return custom_response({'error': 'Only registered users can comment.'}, 400)
-
   rel = article.owner.single().banned_users.relationship(user)
   if rel:
     return custom_response({'error': 'you are banned on this property.'}, 400)
 
-  is_editor = article.owner.single().editors.is_connected(user)
-
-  # check if the user has already commented
   my_comments = article.cypher(
     'MATCH (a:Article) <-- (c:Comment) -[:OWNED_BY]-> (u:User) '
     'WHERE a.uid = "'+ article.uid + '" '
@@ -47,8 +41,9 @@ def create():
     'RETURN COUNT(c)'
   )[0][0][0]
 
-  if not is_editor:
-    if my_comments:
+  # check if the user has already commented
+  is_editor = article.owner.single().editors.is_connected(user)
+  if not is_editor and my_cooments:
       return custom_response({'error': 'You have already commented on this article.'}, 400)
 
   # check if user voted for all comments of article
@@ -93,29 +88,30 @@ def get_one(comment_id):
   return custom_response(data, 200)
 
 
-@blueprint.route('/<comment_id>', methods=['PUT'])
-@Auth.auth_required
-def update(comment_id):
-  req_data = request.get_json()
-  comment = Comment.get(comment_id)
-  if not comment:
-    return custom_response({'error': 'comment not found'}, 404)
+# killing comment updating for now
+# @blueprint.route('/<comment_id>', methods=['PUT'])
+# @Auth.auth_required
+# def update(comment_id):
+#   req_data = request.get_json()
+#   comment = Comment.get(comment_id)
+#   if not comment:
+#     return custom_response({'error': 'comment not found'}, 404)
     
-  data = comment_schema.dump(comment).data
-  owner_id = g.user.get('uid')
-  owner = User.get(owner_id)
+#   data = comment_schema.dump(comment).data
+#   owner_id = g.user.get('uid')
+#   owner = User.get(owner_id)
 
-  is_editor = comment.article.single().owner.single().editors.is_connected(owner)
-  if not is_editor:
-    return custom_response({'error': 'permission denied'}, 400)
+#   is_editor = comment.article.single().owner.single().editors.is_connected(owner)
+#   if not is_editor:
+#     return custom_response({'error': 'permission denied'}, 400)
 
-  data, error = comment_schema.load(req_data, partial=True)
-  if error:
-    return custom_response(error, 400)
-  comment.update(data)
+#   data, error = comment_schema.load(req_data, partial=True)
+#   if error:
+#     return custom_response(error, 400)
+#   comment.update(data)
 
-  data = comment_schema.dump(comment).data
-  return custom_response(data, 200)
+#   data = comment_schema.dump(comment).data
+#   return custom_response(data, 200)
 
 
 @blueprint.route('/<comment_id>', methods=['DELETE'])

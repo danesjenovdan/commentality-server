@@ -6,14 +6,14 @@ class ArticleSchema(Schema):
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
 
-  title = fields.Str(required=True)
+  title = fields.Str()
   external_id = fields.Str(required=True)
   owner = fields.Function(lambda obj: obj.owner.single().name)
   visible = fields.Nested('comment.serializers.CommentSchema',
                           many=True, exclude=('owner', ), dump_only=True)
 
-  can_vote = fields.Boolean(required=False)
-  can_comment = fields.Boolean(required=False)
+  can_vote = fields.Boolean()
+  can_comment = fields.Boolean()
 
 article_schema = ArticleSchema()
 articles_schema = ArticleSchema(many=True)

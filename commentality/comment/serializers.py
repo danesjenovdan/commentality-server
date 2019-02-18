@@ -15,9 +15,24 @@ class CommentSchema(Schema):
 
   def get_votes(self, obj):
     votes = {
-      'like': obj.cypher('MATCH (n)<-[r]-() WHERE n.uid = "' + obj.uid + '" AND r.type="like" RETURN COUNT(r)')[0][0][0],
-      'meh': obj.cypher('MATCH (n)<-[r]-() WHERE n.uid = "' + obj.uid + '" AND r.type="meh" RETURN COUNT(r)')[0][0][0],
-      'dislike': obj.cypher('MATCH (n)<-[r]-() WHERE n.uid = "' + obj.uid + '" AND r.type="dislike" RETURN COUNT(r)')[0][0][0]
+      'like': obj.cypher(
+        'MATCH (n)<-[r]-() '
+        'WHERE n.uid = "' + obj.uid + '" '
+        'AND r.type="like" '
+        'RETURN COUNT(r)'
+      )[0][0][0],
+      'meh': obj.cypher(
+        'MATCH (n)<-[r]-() '
+        'WHERE n.uid = "' + obj.uid + '" '
+        'AND r.type="meh" '
+        'RETURN COUNT(r)'
+      )[0][0][0],
+      'dislike': obj.cypher(
+        'MATCH (n)<-[r]-() '
+        'WHERE n.uid = "' + obj.uid + '" '
+        'AND r.type="dislike" '
+        'RETURN COUNT(r)'
+      )[0][0][0]
     }
     return votes
 

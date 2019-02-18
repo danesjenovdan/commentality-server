@@ -79,7 +79,7 @@ def create():
   return custom_response(data, 201)
 
 
-@blueprint.route('/<uid>', methods=['PUT'])
+@blueprint.route('/<uid>', methods=['PATCH'])
 @Auth.auth_required
 def patch(uid):
   article = Article.get(uid)
@@ -122,3 +122,4 @@ def delete(uid):
 
   article.delete()
   return custom_response({'message': 'deleted'}, 204)
+  
