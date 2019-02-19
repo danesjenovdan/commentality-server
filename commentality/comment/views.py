@@ -34,42 +34,23 @@ def create():
   if rel:
     return custom_response({'error': 'you are banned on this property.'}, 400)
 
-  my_comments = article.cypher(
-    'MATCH (a:Article) <-- (c:Comment) -[:OWNED_BY]-> (u:User) '
-    'WHERE a.uid = "'+ article.uid + '" '
-    'AND u.uid="' + user.uid +'" '
-    'RETURN COUNT(c)'
-  )[0][0][0]
-
-  # check if the user has already commented
-  is_editor = article.owner.single().editors.is_connected(user)
-  if not is_editor and my_comments:
+  if not user.is_editor_on_article(article):
+    if user.has_commented_on_article(article):
       return custom_response({'error': 'You have already commented on this article.'}, 400)
+    elif not user.has_voted_on_all_comments(article):
+      return custom_response({'error': 'You haven\'t voted on all comments yet.'}, 400)
 
-  # check if user voted for all comments of article
-  total_comments = len(article.visible)
-  voted_comments = article.cypher(
-    'MATCH (a:Article) <-- (c:Comment) <-[:VOTED_FOR]- (u:User)'
-    'WHERE a.uid = "' + article.uid + '" '
-    'AND u.uid="'+ user.uid + '" '
-    'RETURN COUNT(c)'
-  )[0][0][0]
+  # Create and save comment
+  comment = Comment(contents=data['contents'])
+  comment.save()
 
-  if is_editor or total_comments == voted_comments:
-    # Create and save comment
-    comment = Comment(contents=data['contents'])
-    comment.save()
+  comment.article.connect(article)
 
-    comment.article.connect(article)
+  # Connect owner
+  comment.owner.connect(user)
 
-    # Connect owner
-    comment.owner.connect(user)
-
-    data = comment_schema.dump(comment).data
-    return custom_response(data, 201)
-  else:
-    return custom_response({'error': 'first, vote for all comments'}, 400)
-
+  data = comment_schema.dump(comment).data
+  return custom_response(data, 201)
 
 @blueprint.route('/', methods=['GET'])
 @Auth.superuser_required
