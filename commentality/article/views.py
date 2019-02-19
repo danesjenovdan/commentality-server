@@ -16,6 +16,7 @@ def get_one(uid):
   if not article:
     return custom_response({'error': 'article not found'}, 404)
 
+  # this could be made into an auth decorator (e.g. @Auth.auth_possible)
   token = request.headers.get('api-token')
   data = Auth.decode_token(token)
   if 'user_uid' in data['data'].keys():
@@ -24,12 +25,15 @@ def get_one(uid):
   else:
     user = None
 
-  data = article_schema.dump(article).data
-  if user:
-    # get voted comments
-    results, columns = article.cypher('MATCH (a:Article)<-[:POSTED_ON]-(c)<-[r:VOTED_FOR]-(u:User) WHERE u.uid = "' + user_id + '" AND a.uid = "' + article.uid + '" RETURN c')
-    data['voted_by_me'] = [article.inflate(row[0]).uid for row in results]
+  comments_voted_on = []
 
+  for comment in article.visible_comments:
+    if user and comment.voters.is_connected(user):
+      comments_voted_on.append(comment.uid)
+
+  article.comments_voted_on = comments_voted_on
+
+  data = article_schema.dump(article).data
   return custom_response(data, 200)
 
 

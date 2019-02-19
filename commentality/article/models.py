@@ -9,8 +9,8 @@ class Article(StructuredNode):
   external_id = StringProperty(required=True)
   title = StringProperty(required=True)
   owner = RelationshipTo('media_property.models.MediaProperty', 'OWNED_BY', cardinality=One)
-  visible = RelationshipFrom('comment.models.Comment', 'POSTED_ON')
-  hidden = RelationshipFrom('comment.models.Comment', 'HIDDEN_ON')
+  visible_comments = RelationshipFrom('comment.models.Comment', 'POSTED_ON')
+  hidden_comments = RelationshipFrom('comment.models.Comment', 'HIDDEN_ON')
 
   can_vote = BooleanProperty(default=True)
   can_comment = BooleanProperty(default=True)
