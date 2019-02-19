@@ -43,11 +43,11 @@ def create():
 
   # check if the user has already commented
   is_editor = article.owner.single().editors.is_connected(user)
-  if not is_editor and my_cooments:
+  if not is_editor and my_comments:
       return custom_response({'error': 'You have already commented on this article.'}, 400)
 
   # check if user voted for all comments of article
-  total_comments = len(article.comments)
+  total_comments = len(article.visible)
   voted_comments = article.cypher(
     'MATCH (a:Article) <-- (c:Comment) <-[:VOTED_FOR]- (u:User)'
     'WHERE a.uid = "' + article.uid + '" '
@@ -96,7 +96,7 @@ def get_one(comment_id):
 #   comment = Comment.get(comment_id)
 #   if not comment:
 #     return custom_response({'error': 'comment not found'}, 404)
-    
+
 #   data = comment_schema.dump(comment).data
 #   owner_id = g.user.get('uid')
 #   owner = User.get(owner_id)
@@ -127,7 +127,7 @@ def delete(comment_id):
 
   if not is_editor:
     return custom_response({'error': 'permission denied'}, 400)
-  
+
   comment.hidden.connect(article)
   comment.article.disconnect(article)
 

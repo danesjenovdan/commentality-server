@@ -122,4 +122,3 @@ def delete(uid):
 
   article.delete()
   return custom_response({'message': 'deleted'}, 204)
-  
