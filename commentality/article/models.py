@@ -6,7 +6,6 @@ class Article(StructuredNode):
   created_at = DateTimeProperty(default_now=True)
   modified_at = DateTimeProperty(default_now=True)
 
-  external_id = StringProperty(required=True)
   title = StringProperty(required=True)
   owner = RelationshipTo('media_property.models.MediaProperty', 'OWNED_BY', cardinality=One)
   visible_comments = RelationshipFrom('comment.models.Comment', 'POSTED_ON')
@@ -24,11 +23,7 @@ class Article(StructuredNode):
     return Article.nodes.get_or_none(uid=uid)
 
   def __repr__(self):
-    return '<Article({name!r})>'.format(name=self.external_id)
-
-  @staticmethod
-  def get_by_external_id(external_id):
-    return Article.nodes.get_or_none(external_id=external_id)
+    return '<Article({name!r})>'.format(name=self.title)
 
   def update(self, data):
     for name, value in data.items():

@@ -1,6 +1,6 @@
 from flask import g
 from neomodel import (StructuredNode, StringProperty, RelationshipTo,
-  RelationshipFrom, UniqueIdProperty, DateTimeProperty, One)
+  RelationshipFrom, UniqueIdProperty, DateTimeProperty, BooleanProperty, One)
 from relations.vote import VoteRelationship
 from relations.comment import CommentRelationship
 
@@ -12,8 +12,9 @@ class Comment(StructuredNode):
   contents = StringProperty(required=True)
   owner = RelationshipTo('user.models.User', 'OWNED_BY', cardinality=One, model=CommentRelationship)
   article = RelationshipTo('article.models.Article', 'POSTED_ON')
-  voters = RelationshipFrom('user.models.User', 'VOTED_FOR', model=VoteRelationship)
   hidden = RelationshipTo('article.models.Article', 'HIDDEN_ON')
+  voters = RelationshipFrom('user.models.User', 'VOTED_FOR', model=VoteRelationship)
+  pending = BooleanProperty(default=True)
 
   @property
   def votes(self):

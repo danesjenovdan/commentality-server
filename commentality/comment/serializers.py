@@ -15,5 +15,8 @@ class CommentSchema(Schema):
   article_uid = fields.Function(lambda obj: obj.article.single().uid,)
   current_user_voted = fields.String()
   votes = fields.Nested(VotesSchema())
+  visible = fields.Function(lambda obj: True if obj.article.single() else False)
+  hidden = fields.Function(lambda obj: True if obj.hidden.single() else False)
+  pending = fields.Boolean()
 
 comment_schema = CommentSchema()

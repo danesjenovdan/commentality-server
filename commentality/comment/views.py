@@ -68,6 +68,56 @@ def get_one(comment_id):
   data = comment_schema.dump(comment).data
   return custom_response(data, 200)
 
+# TODO turn media ownership check into a decorator
+@blueprint.route('/hide/<comment_id>', methods=['POST'])
+@Auth.superuser_required
+def hide(comment_id):
+  comment = Comment.get(comment_id)
+  if not comment:
+    return custom_response({'error': 'comment not found'}, 404)
+
+  article = comment.article.single() if comment.article.single() else comment.hidden.single()
+
+  owner_id = g.user.get('uid')
+  owner = User.get(owner_id)
+  is_editor = article.owner.single().editors.is_connected(owner)
+
+  if not is_editor:
+    return custom_response({'error': 'permission denied'}, 400)
+
+  comment.hidden.connect(article)
+  comment.article.disconnect(article)
+  comment.pending = False
+  comment.save()
+
+  data = comment_schema.dump(comment).data
+
+  return custom_response(data, 200)
+
+@blueprint.route('/show/<comment_id>', methods=['POST'])
+@Auth.superuser_required
+def show(comment_id):
+  comment = Comment.get(comment_id)
+  if not comment:
+    return custom_response({'error': 'comment not found'}, 404)
+
+  article = comment.article.single() if comment.article.single() else comment.hidden.single()
+
+  owner_id = g.user.get('uid')
+  owner = User.get(owner_id)
+  is_editor = article.owner.single().editors.is_connected(owner)
+
+  if not is_editor:
+    return custom_response({'error': 'permission denied'}, 400)
+
+  comment.hidden.disconnect(article)
+  comment.article.connect(article)
+  comment.pending = False
+  comment.save()
+
+  data = comment_schema.dump(comment).data
+
+  return custom_response(data, 200)
 
 # killing comment updating for now
 # @blueprint.route('/<comment_id>', methods=['PUT'])

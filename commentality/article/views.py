@@ -73,7 +73,6 @@ def create():
     return custom_response({'error': 'property not found'}, 404)
   # Create and save article
   article = Article(
-    external_id=data['external_id'],
     title = data['title']
   )
   article.save()

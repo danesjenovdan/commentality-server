@@ -94,6 +94,24 @@ def refresh_token():
     'uid': serialized_data.get('uid'),
   }, 201)
 
+# TODO remove this
+@blueprint.route('/godmode', methods=['POST'])
+@Auth.auth_required
+def enable_superuser():
+  token = request.headers.get('api-token')
+  data = Auth.decode_token(token)
+  user_uid = data['data']['user_uid']
+  # this should always work because user is authorised
+  user = User.get(user_uid)
+
+  user.is_superuser = True
+  user.save()
+
+  serialized_data = user_schema.dump(user).data
+  return custom_response({
+    'message': 'you are now god'
+  }, 200)
+
 @blueprint.route('/', methods=['GET'])
 @Auth.auth_required
 def get_all():
