@@ -25,14 +25,6 @@ def get_one(uid):
   else:
     user = None
 
-  comments_voted_on = []
-
-  for comment in article.visible_comments:
-    if user and comment.voters.is_connected(user):
-      comments_voted_on.append(comment.uid)
-
-  article.comments_voted_on = comments_voted_on
-
   data = article_schema.dump(article).data
   return custom_response(data, 200)
 
