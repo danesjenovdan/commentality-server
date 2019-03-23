@@ -2,11 +2,11 @@ from marshmallow import Schema, fields
 
 
 class ArticleSchema(Schema):
-  uid = fields.Str(dump_only=True)
+  uid = fields.String(dump_only=True)
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
 
-  title = fields.Str()
+  title = fields.String()
   owner = fields.Function(lambda obj: obj.owner.single().name)
   visible_comments = fields.Nested('comment.serializers.CommentSchema',
                                   many=True, exclude=('owner', ), dump_only=True)
