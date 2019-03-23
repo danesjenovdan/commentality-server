@@ -24,6 +24,10 @@ class Comment(StructuredNode):
       votes[vote.type] += 1
     return votes
 
+  @property
+  def voter_ids(self):
+    return [voter.uid for voter in self.voters]
+
   @staticmethod
   def get_all():
     return Comment.nodes
@@ -31,9 +35,6 @@ class Comment(StructuredNode):
   @staticmethod
   def get(uid):
     return Comment.nodes.get_or_none(uid=uid)
-
-  def user_voted(self, user):
-    return user in self.voters
 
   def __repr__(self):
     return '<Comment {}>'.format(self.uid)

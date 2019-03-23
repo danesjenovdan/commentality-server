@@ -13,7 +13,7 @@ class CommentSchema(Schema):
   contents = fields.String(required=True)
   owner = fields.Function(lambda obj: obj.owner.single().name)
   article_uid = fields.Function(lambda obj: obj.article.single().uid,)
-  current_user_voted = fields.String()
+  voter_ids = fields.List(fields.String(), dump_only=True)
   votes = fields.Nested(VotesSchema())
   visible = fields.Function(lambda obj: True if obj.article.single() else False)
   hidden = fields.Function(lambda obj: True if obj.hidden.single() else False)
