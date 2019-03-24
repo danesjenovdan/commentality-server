@@ -34,8 +34,24 @@ def create():
   owner_id = g.user.get('uid')
   owner = User.get(owner_id)
   
-  # TODO: add editors with separate endpoint
   media_property.editors.connect(owner)
 
   data = media_property_schema.dump(media_property).data
   return custom_response(data, 201)
+
+@blueprint.route('/add_editor/<editor_uid>', methods=['POST'])
+@Auth.superuser_required
+def add_editor(editor_uid):
+  # get media property
+  req_data = request.get_json()
+  data, error = media_property_schema.load(req_data)
+  if error:
+    return custom_response(error, 400)
+
+  editor = User.get(editor_uid)
+  media_property = MediaProperty.get(data['uid'])
+
+  media_property.editors.connect(editor)
+
+  data = media_property_schema.dump(media_property).data
+  return custom_response(data, 200)
