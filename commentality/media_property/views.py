@@ -2,7 +2,7 @@ from flask import request, Blueprint, g
 from authentication import Auth
 from common import custom_response
 from media_property.models import MediaProperty
-from media_property.serializers import media_peroperty_schema
+from media_property.serializers import media_property_schema
 from user.models import User
 
 # logging
@@ -20,7 +20,7 @@ blueprint = Blueprint('property', __name__)
 @Auth.superuser_required
 def create():
   req_data = request.get_json()
-  data, error = media_peroperty_schema.load(req_data)
+  data, error = media_property_schema.load(req_data)
   if error:
     return custom_response(error, 400)
 
@@ -37,5 +37,5 @@ def create():
   # TODO: add editors with separate endpoint
   media_property.editors.connect(owner)
 
-  data = media_peroperty_schema.dump(media_property).data
+  data = media_property_schema.dump(media_property).data
   return custom_response(data, 201)

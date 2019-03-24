@@ -40,8 +40,7 @@ def get_all():
 @blueprint.route('/by_property/<property_uid>', methods=['GET'])
 @Auth.auth_required
 def get_all_by_property(property_uid):
-  user_id = g.user.get('uid')
-  user = User.get(user_id)
+  user = User.get(g.user.get('uid'))
   media_property = MediaProperty.get(property_uid)
   if not media_property:
     return custom_response({'error': 'property not found'}, 404)
@@ -90,7 +89,7 @@ def patch(uid):
   app.app.logger.info(user_id)
   user = User.get(user_id)
 
-  if not article.owner.all()[0].editors.is_connected(user):
+  if not article.owner.single().editors.is_connected(user):
     return custom_response({'error': 'permission denied'}, 400)
 
   data['uid'] = uid
@@ -112,7 +111,7 @@ def delete(uid):
   app.app.logger.info(user_id)
   user = User.get(user_id)
 
-  if not article.owner.all()[0].editors.is_connected(user):
+  if not article.owner.single().editors.is_connected(user):
     return custom_response({'error': 'permission denied'}, 400)
 
   article.delete()

@@ -81,11 +81,7 @@ def verify():
 @blueprint.route('/refresh', methods=['POST'])
 @Auth.auth_required
 def refresh_token():
-  token = request.headers.get('api-token')
-  data = Auth.decode_token(token)
-  user_uid = data['data']['user_uid']
-  # this should always work because user is authorised
-  user = User.get(user_uid)
+  user = User.get(g.user.get('uid'))
 
   serialized_data = user_schema.dump(user).data
   token = Auth.generate_token(serialized_data.get('uid'))
@@ -98,11 +94,7 @@ def refresh_token():
 @blueprint.route('/godmode', methods=['POST'])
 @Auth.auth_required
 def enable_superuser():
-  token = request.headers.get('api-token')
-  data = Auth.decode_token(token)
-  user_uid = data['data']['user_uid']
-  # this should always work because user is authorised
-  user = User.get(user_uid)
+  user = User.get(g.user.get('uid'))
 
   user.is_superuser = True
   user.save()
@@ -113,14 +105,14 @@ def enable_superuser():
   }, 200)
 
 @blueprint.route('/', methods=['GET'])
-@Auth.auth_required
+@Auth.superuser_required
 def get_all():
   users = User.get_all()
   serialized_users = user_schema.dump(users, many=True).data
   return custom_response(serialized_users, 200)
 
 @blueprint.route('/<int:user_uid>', methods=['GET'])
-@Auth.auth_required
+@Auth.superuser_required
 def get(user_uid):
   user = User.get(user_uid)
   if not user:

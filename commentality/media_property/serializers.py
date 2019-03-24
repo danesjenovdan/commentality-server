@@ -10,4 +10,4 @@ class MediaPropertySchema(Schema):
   articles = fields.Nested('article.serializers.ArticleSchema',
                            many=True, exclude=('owner', ), dump_only=True)
 
-media_peroperty_schema = MediaPropertySchema()
+media_property_schema = MediaPropertySchema()
