@@ -11,3 +11,4 @@ class MediaPropertySchema(Schema):
                            many=True, exclude=('owner', ), dump_only=True)
 
 media_property_schema = MediaPropertySchema()
+media_properties_schema = MediaPropertySchema(many=True)

@@ -3,6 +3,7 @@ from authentication import Auth
 from common import custom_response
 from user.models import User
 from user.serializers import user_schema
+from media_property.serializers import media_properties_schema
 
 from user import otp
 
@@ -147,3 +148,12 @@ def get_me():
   user = User.get(g.user.get('uid'))
   serialized_user = user_schema.dump(user).data
   return custom_response(serialized_user, 200)
+
+@blueprint.route('/my_properties', methods=['GET'])
+@Auth.superuser_required
+def get_my_properties():
+  user = User.get(g.user.get('uid'))
+  media_properties = user.media_properties.all()
+  data = media_properties_schema.dump(media_properties).data
+
+  return custom_response(data, 200)
