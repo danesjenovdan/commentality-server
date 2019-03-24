@@ -31,24 +31,23 @@ def get_code():
 
   if req_data['number']:
     app.app.logger.info('Got number: %s, sending verification code.' % req_data['number']) # TODO remove so number isn't stored in logs
-    verification_code = otp.send_confirmation_code(req_data['number'])
+    (verification_code, number) = otp.send_confirmation_code(req_data['number'])
 
-    user_in_db = User.get_by_number(req_data['number'])
+    user_in_db = User.get_by_number(number)
     if not user_in_db:
       user = User()
-      user.set_number(req_data['number'])
+      user.set_number(number)
     else:
       user = user_in_db
-  
+
   user.code = verification_code
 
   app.app.logger.info('Saving user:\n%s\n%s\n\n' % (str(user.number), str(user.code)))
 
   user.save()
-  
-  return custom_response({
-    'status': 'Sent verification code to %s' % req_data['number']
-  }, 200)
+
+  # Return the number Twilio normalized for us to the user
+  return custom_response(number, 200)
 
 @blueprint.route('/verify', methods=['POST'])
 def verify():
