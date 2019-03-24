@@ -1,3 +1,4 @@
+import app
 from neomodel import (StructuredNode, StringProperty, RelationshipFrom,
   UniqueIdProperty, DateTimeProperty, One, RelationshipTo, BooleanProperty)
 
@@ -13,6 +14,15 @@ class Article(StructuredNode):
 
   can_vote = BooleanProperty(default=True)
   can_comment = BooleanProperty(default=True)
+
+  @property
+  def commenters(self):
+    commenters = set()
+    for comment in self.visible_comments:
+      app.app.logger.info(comment.owner.single().uid)
+
+      commenters.add(comment.owner.single().uid)
+    return commenters
 
   @staticmethod
   def get_all():
