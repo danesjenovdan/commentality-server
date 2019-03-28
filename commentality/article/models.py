@@ -31,6 +31,10 @@ class Article(StructuredNode):
   @staticmethod
   def get(uid):
     return Article.nodes.get_or_none(uid=uid)
+  
+  @staticmethod
+  def get_by_title(title):
+    return Article.nodes.get_or_none(title=title)
 
   def __repr__(self):
     return '<Article({name!r})>'.format(name=self.title)

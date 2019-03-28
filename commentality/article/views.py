@@ -28,6 +28,23 @@ def get_one(uid):
   data = article_schema.dump(article).data
   return custom_response(data, 200)
 
+@blueprint.route('/by_title/<title>', methods=['GET'])
+def get_by_title(title):
+  article = Article.get_by_title(title)
+  if not article:
+    return custom_response({'error': 'article not found'}, 404)
+  
+  # this could be made into an auth decorator (e.g. @Auth.auth_possible)
+  token = request.headers.get('api-token')
+  data = Auth.decode_token(token)
+  if 'user_uid' in data['data'].keys():
+    user_id = data['data']['user_uid']
+    user = User.get(user_id)
+  else:
+    user = None
+  
+  data = article_schema.dump(article).data
+  return custom_response(data, 200)
 
 @blueprint.route('/', methods=['GET'])
 @Auth.superuser_required
