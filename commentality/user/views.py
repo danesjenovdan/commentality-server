@@ -3,29 +3,86 @@ from authentication import Auth
 from common import custom_response
 from user.models import User
 from user.serializers import user_schema
+from media_property.serializers import media_properties_schema
+
+from user import otp
+
+# logging
+import app
+
+#  encryption
+from config import app_config
+import hmac
+import hashlib
 
 blueprint = Blueprint('user', __name__)
 
 @blueprint.route('/', methods=['POST'])
-def create():
+def get_code():
+  '''
+    Takes number and creates or logs user in.
+  '''
   req_data = request.get_json()
-  data, error = user_schema.load(req_data)
+  # TODO consider validating input
+  # data, error = user_schema.load(req_data)
 
-  if error:
-    return custom_response(error, 400)
+  # if error:
+  #   return custom_response(error, 400)
 
-  user_in_db = User.get_by_email(data.get('email'))
-  if user_in_db:
-    message = {'error': 'User already exists'}
+  if req_data['number']:
+    app.app.logger.info('Got number: %s, sending verification code.' % req_data['number']) # TODO remove so number isn't stored in logs
+    (verification_code, number) = otp.send_confirmation_code(req_data['number'])
+
+    user_in_db = User.get_by_number(number)
+    if not user_in_db:
+      user = User()
+      user.set_number(number)
+    else:
+      user = user_in_db
+
+  user.code = verification_code
+
+  app.app.logger.info('Saving user:\n%s\n%s\n\n' % (str(user.number), str(user.code)))
+
+  user.save()
+
+  # Return the number Twilio normalized for us to the user
+  return custom_response(number, 200)
+
+@blueprint.route('/verify', methods=['POST'])
+def verify():
+  req_data = request.get_json()
+  # TODO consider verifying
+  # data, error = user_schema.load(req_data)
+
+  # if error:
+  #   return custom_response(error, 400)
+
+  app.app.logger.info('Getting user:\n%s\n%s\n\n' % (str(req_data['number']), str(req_data['code'])))
+  user_by_code = User.get_by_code(str(req_data['code']))
+
+  if user_by_code and user_by_code.check_number(req_data['number']):
+    user = user_by_code
+
+    # destroy code
+    user.code = ''
+    user.save()
+
+    serialized_data = user_schema.dump(user).data
+    token = Auth.generate_token(serialized_data.get('uid'))
+    return custom_response({
+      'jwt_token': token,
+      'uid': serialized_data.get('uid'),
+    }, 201)
+  else:
+    message = {'error': 'Wrong verification code.'}
     return custom_response(message, 400)
 
-  user = User(
-    name=data.get('name'),
-    email=data.get('email'),
-  )
+@blueprint.route('/refresh', methods=['POST'])
+@Auth.auth_required
+def refresh_token():
+  user = User.get(g.user.get('uid'))
 
-  user.set_password(password=data.get('password'))
-  user.save()
   serialized_data = user_schema.dump(user).data
   token = Auth.generate_token(serialized_data.get('uid'))
   return custom_response({
@@ -33,15 +90,41 @@ def create():
     'uid': serialized_data.get('uid'),
   }, 201)
 
-@blueprint.route('/', methods=['GET'])
+@blueprint.route('/refresh_long', methods=['POST'])
 @Auth.auth_required
+def refresh_long_token():
+  user = User.get(g.user.get('uid'))
+
+  serialized_data = user_schema.dump(user).data
+  token = Auth.generate_long_term_token(serialized_data.get('uid'))
+  return custom_response({
+    'jwt_token': token,
+    'uid': serialized_data.get('uid'),
+  }, 201)
+
+# TODO remove this
+@blueprint.route('/godmode', methods=['POST'])
+@Auth.auth_required
+def enable_superuser():
+  user = User.get(g.user.get('uid'))
+
+  user.is_superuser = True
+  user.save()
+
+  serialized_data = user_schema.dump(user).data
+  return custom_response({
+    'message': 'you are now god'
+  }, 200)
+
+@blueprint.route('/', methods=['GET'])
+@Auth.superuser_required
 def get_all():
   users = User.get_all()
   serialized_users = user_schema.dump(users, many=True).data
   return custom_response(serialized_users, 200)
 
 @blueprint.route('/<int:user_uid>', methods=['GET'])
-@Auth.auth_required
+@Auth.superuser_required
 def get(user_uid):
   user = User.get(user_uid)
   if not user:
@@ -77,24 +160,11 @@ def get_me():
   serialized_user = user_schema.dump(user).data
   return custom_response(serialized_user, 200)
 
+@blueprint.route('/my_properties', methods=['GET'])
+@Auth.superuser_required
+def get_my_properties():
+  user = User.get(g.user.get('uid'))
+  media_properties = user.media_properties.all()
+  data = media_properties_schema.dump(media_properties).data
 
-@blueprint.route('/login', methods=['POST'])
-def login():
-  req_data = request.get_json()
-
-  data, error = user_schema.load(req_data, partial=True)
-  if error:
-    return custom_response(error, 400)
-  if not data.get('email') or not data.get('password'):
-    return custom_response({'error': 'you need email and password to sign in'}, 400)
-  user = User.get_by_email(data.get('email'))
-  if not user:
-    return custom_response({'error': 'invalid credentials'}, 400)
-  if not user.check_password(data.get('password')):
-    return custom_response({'error': 'invalid credentials'}, 400)
-  serialized_data = user_schema.dump(user).data
-  token = Auth.generate_token(serialized_data.get('uid'))
-  return custom_response({
-    'jwt_token': token,
-    'uid': serialized_data.get('uid'),
-  }, 200)
+  return custom_response(data, 200)

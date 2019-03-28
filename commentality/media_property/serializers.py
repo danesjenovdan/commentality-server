@@ -1,13 +1,14 @@
 from marshmallow import Schema, fields
 
 
-class UserSchema(Schema):
+class MediaPropertySchema(Schema):
   uid = fields.String()
   created_at = fields.DateTime(dump_only=True)
   modified_at = fields.DateTime(dump_only=True)
 
-  number = fields.String(load_only=True)
-  comments = fields.Nested('comment.serializers.CommentSchema',
+  name = fields.String()
+  articles = fields.Nested('article.serializers.ArticleSchema',
                            many=True, exclude=('owner', ), dump_only=True)
 
-user_schema = UserSchema()
+media_property_schema = MediaPropertySchema()
+media_properties_schema = MediaPropertySchema(many=True)
