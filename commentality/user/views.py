@@ -90,6 +90,18 @@ def refresh_token():
     'uid': serialized_data.get('uid'),
   }, 201)
 
+@blueprint.route('/refresh_long', methods=['POST'])
+@Auth.auth_required
+def refresh_long_token():
+  user = User.get(g.user.get('uid'))
+
+  serialized_data = user_schema.dump(user).data
+  token = Auth.generate_long_term_token(serialized_data.get('uid'))
+  return custom_response({
+    'jwt_token': token,
+    'uid': serialized_data.get('uid'),
+  }, 201)
+
 # TODO remove this
 @blueprint.route('/godmode', methods=['POST'])
 @Auth.auth_required

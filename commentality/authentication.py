@@ -34,6 +34,29 @@ class Auth():
       )
 
   @staticmethod
+  def generate_long_term_token(user_uid):
+    """
+    Generate Token Method
+    """
+    try:
+      payload = {
+        'exp': datetime.datetime.utcnow() + datetime.timedelta(days=365),
+        'iat': datetime.datetime.utcnow(),
+        'sub': user_uid
+      }
+      return jwt.encode(
+        payload,
+        os.getenv('JWT_SECRET_KEY'),
+        'HS256'
+      ).decode("utf-8")
+    except Exception as e:
+      return Response(
+        mimetype="application/json",
+        response=json.dumps({'error': 'error in generating user token'}),
+        status=500
+      )
+
+  @staticmethod
   def decode_token(token):
     """
     Decode token method
