@@ -14,7 +14,7 @@ def create_app(env_name):
   register_extensions(app)
   register_blueprints(app)
 
-  @app.route('/', methods=['GET'])
+  @app.route('/backend/', methods=['GET'])
   def index():
     return 'Commentality!!!'
 
@@ -26,6 +26,6 @@ def register_extensions(app):
   cors.init_app(app)
 
 def register_blueprints(app):
-  app.register_blueprint(article.views.blueprint, url_prefix='/api/v1/articles')
-  app.register_blueprint(comment.views.blueprint, url_prefix='/api/v1/comments')
-  app.register_blueprint(user.views.blueprint, url_prefix='/api/v1/users')
+  app.register_blueprint(article.views.blueprint, url_prefix='/backend/api/v1/articles')
+  app.register_blueprint(comment.views.blueprint, url_prefix='/backend/api/v1/comments')
+  app.register_blueprint(user.views.blueprint, url_prefix='/backend/api/v1/users')
