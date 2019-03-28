@@ -35,6 +35,8 @@ services:
     volumes:
       - ./nginx.conf:/etc/nginx/conf.d/commentality.conf
       - /home/commentality/commentality-client/:/var/commentality-client/
+      - /etc/letsencrypt/:/etc/certs/
+      - /home/commentality/commentality-landing/:/var/commentality-landing/
 
 volumes:
   neo4j-data:
