@@ -16,5 +16,14 @@ class ArticleSchema(Schema):
   can_comment = fields.Boolean()
   commenters = fields.List(fields.String(), dump_only=True)
 
+class AnalizedArticleSchema(Schema):
+  uid = fields.String(dump_only=True)
+  created_at = fields.DateTime(dump_only=True)
+  modified_at = fields.DateTime(dump_only=True)
+
+  title = fields.String()
+  commenter_count = fields.Integer(dump_only=True)
+
+
 article_schema = ArticleSchema()
 articles_schema = ArticleSchema(many=True)

@@ -10,5 +10,11 @@ class MediaPropertySchema(Schema):
   articles = fields.Nested('article.serializers.ArticleSchema',
                            many=True, exclude=('owner', ), dump_only=True)
 
+class MostDiscussedSchema(Schema):
+  articles = fields.Nested('article.serializers.AnalizedArticleSchema',
+                           many=True, exclude=('owner', ), dump_only=True)
+
 media_property_schema = MediaPropertySchema()
 media_properties_schema = MediaPropertySchema(many=True)
+
+most_discussed_schema = MostDiscussedSchema()

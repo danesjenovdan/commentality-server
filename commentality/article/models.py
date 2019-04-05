@@ -23,6 +23,10 @@ class Article(StructuredNode):
 
       commenters.add(comment.owner.single().uid)
     return commenters
+  
+  @property
+  def commenter_count(self):
+    return len(self.commenters)
 
   @staticmethod
   def get_all():

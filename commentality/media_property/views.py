@@ -2,7 +2,7 @@ from flask import request, Blueprint, g
 from authentication import Auth
 from common import custom_response
 from media_property.models import MediaProperty
-from media_property.serializers import media_property_schema, media_properties_schema
+from media_property.serializers import media_property_schema, media_properties_schema, most_discussed_schema
 from user.models import User
 
 # logging
@@ -60,4 +60,10 @@ def add_editor(editor_uid):
   media_property.editors.connect(editor)
 
   data = media_property_schema.dump(media_property).data
+  return custom_response(data, 200)
+
+@blueprint.route('/most_discussed/<property_uid>', methods=['GET'])
+def most_discussed(property_uid):
+  data = most_discussed_schema.dump(MediaProperty.get(uid=property_uid)).data
+
   return custom_response(data, 200)
