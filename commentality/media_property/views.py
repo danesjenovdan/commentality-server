@@ -2,7 +2,7 @@ from flask import request, Blueprint, g
 from authentication import Auth
 from common import custom_response
 from media_property.models import MediaProperty
-from media_property.serializers import media_property_schema
+from media_property.serializers import media_property_schema, media_properties_schema
 from user.models import User
 
 # logging
@@ -15,6 +15,12 @@ import hashlib
 
 blueprint = Blueprint('property', __name__)
 
+@blueprint.route('/', methods=['GET'])
+@Auth.superuser_required
+def all():
+  properties = media_properties_schema.dump(MediaProperty.get_all())
+
+  return custom_response(properties, 200)
 
 @blueprint.route('/', methods=['POST'])
 @Auth.superuser_required
