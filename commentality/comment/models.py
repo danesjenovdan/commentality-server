@@ -28,6 +28,10 @@ class Comment(StructuredNode):
   def voter_ids(self):
     return [voter.uid for voter in self.voters]
 
+  @property
+  def voter_count(self):
+    return len(self.voters)
+
   @staticmethod
   def get_all():
     return Comment.nodes

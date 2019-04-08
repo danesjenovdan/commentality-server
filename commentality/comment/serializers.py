@@ -15,6 +15,7 @@ class CommentSchema(Schema):
   article_uid = fields.Function(lambda obj: obj.article.single().uid,)
   voter_ids = fields.List(fields.String(), dump_only=True)
   votes = fields.Nested(VotesSchema())
+  voter_count = fields.Integer()
   visible = fields.Function(lambda obj: True if obj.article.single() else False)
   hidden = fields.Function(lambda obj: True if obj.hidden.single() else False)
   pending = fields.Boolean()
