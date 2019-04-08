@@ -5,7 +5,7 @@ from config import app_config
 
 def send_confirmation_code(to_number):
     verification_code = _generate_code()
-    number = _send_sms(to_number, 'Tvoje enkratno geslo za Commentality je ' + str(verification_code))
+    number = _send_sms(to_number, 'Tvoje enkratno geslo za Parlameter je ' + str(verification_code))
     return (verification_code, number)
 
 def _generate_code():
