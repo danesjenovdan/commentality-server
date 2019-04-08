@@ -23,6 +23,7 @@ class AnalizedArticleSchema(Schema):
 
   title = fields.String()
   commenter_count = fields.Integer(dump_only=True)
+  voter_count = fields.Integer(dump_only=True)
 
 
 article_schema = ArticleSchema()

@@ -28,6 +28,15 @@ class Article(StructuredNode):
   def commenter_count(self):
     return len(self.commenters)
 
+  @property
+  def voter_count(self):
+    count = 0
+    for comment in self.visible_comments:
+      if count < comment.voter_count:
+        count = comment.voter_count
+    
+    return count
+
   @staticmethod
   def get_all():
     return Article.nodes
