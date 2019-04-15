@@ -119,30 +119,30 @@ def show(comment_id):
 
   return custom_response(data, 200)
 
-# killing comment updating for now
-# @blueprint.route('/<comment_id>', methods=['PUT'])
-# @Auth.auth_required
-# def update(comment_id):
-#   req_data = request.get_json()
-#   comment = Comment.get(comment_id)
-#   if not comment:
-#     return custom_response({'error': 'comment not found'}, 404)
+# comment updating undead for now
+@blueprint.route('/<comment_id>', methods=['PATCH'])
+@Auth.auth_required
+def update(comment_id):
+  req_data = request.get_json()
+  comment = Comment.get(comment_id)
+  if not comment:
+    return custom_response({'error': 'comment not found'}, 404)
 
-#   data = comment_schema.dump(comment).data
-#   owner_id = g.user.get('uid')
-#   owner = User.get(owner_id)
+  data = comment_schema.dump(comment).data
+  owner_id = g.user.get('uid')
+  owner = User.get(owner_id)
 
-#   is_editor = comment.article.single().owner.single().editors.is_connected(owner)
-#   if not is_editor:
-#     return custom_response({'error': 'permission denied'}, 400)
+  is_editor = comment.article.single().owner.single().editors.is_connected(owner)
+  if not is_editor:
+    return custom_response({'error': 'permission denied'}, 400)
 
-#   data, error = comment_schema.load(req_data, partial=True)
-#   if error:
-#     return custom_response(error, 400)
-#   comment.update(data)
+  data, error = comment_schema.load(req_data, partial=True)
+  if error:
+    return custom_response(error, 400)
+  comment.update(data)
 
-#   data = comment_schema.dump(comment).data
-#   return custom_response(data, 200)
+  data = comment_schema.dump(comment).data
+  return custom_response(data, 200)
 
 
 @blueprint.route('/<comment_id>', methods=['DELETE'])
