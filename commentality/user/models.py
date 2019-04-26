@@ -9,11 +9,9 @@ import app
 from relations.vote import VoteRelationship
 from relations.comment import CommentRelationship
 
-class User(StructuredNode):
-  uid = UniqueIdProperty()
-  created_at = DateTimeProperty(default_now=True)
-  modified_at = DateTimeProperty(default_now=True)
+from common import CommentalityModel
 
+class User(CommentalityModel):
   number = StringProperty()
   code = StringProperty()
   is_superuser = BooleanProperty(default=False)
@@ -21,14 +19,6 @@ class User(StructuredNode):
   votes = RelationshipTo('comment.models.Comment', 'VOTED_FOR', model=VoteRelationship)
   media_properties = RelationshipFrom('media_property.models.MediaProperty', 'EDITED_BY')
   banned_on = RelationshipTo('media_property.models.MediaProperty', 'BANNED_ON')
-
-  @staticmethod
-  def get_all():
-    return User.nodes
-
-  @staticmethod
-  def get(uid):
-    return User.nodes.get_or_none(uid=uid)
 
   @staticmethod
   def get_by_number(number):
@@ -67,6 +57,3 @@ class User(StructuredNode):
       if not comment.voters.is_connected(self):
         return False
     return True
-
-  def __repr__(self):
-    return '<User({uid!r})>'.format(uid=self.uid)

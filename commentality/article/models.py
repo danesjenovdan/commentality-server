@@ -1,12 +1,9 @@
 import app
 from neomodel import (StructuredNode, StringProperty, RelationshipFrom,
   UniqueIdProperty, DateTimeProperty, One, RelationshipTo, BooleanProperty)
+from common import CommentalityModel
 
-class Article(StructuredNode):
-  uid = UniqueIdProperty()
-  created_at = DateTimeProperty(default_now=True)
-  modified_at = DateTimeProperty(default_now=True)
-
+class Article(CommentalityModel):
   title = StringProperty(required=True)
   owner = RelationshipTo('media_property.models.MediaProperty', 'OWNED_BY', cardinality=One)
   visible_comments = RelationshipFrom('comment.models.Comment', 'POSTED_ON')
@@ -23,7 +20,7 @@ class Article(StructuredNode):
 
       commenters.add(comment.owner.single().uid)
     return commenters
-  
+
   @property
   def commenter_count(self):
     return len(self.commenters)
@@ -34,23 +31,12 @@ class Article(StructuredNode):
     for comment in self.visible_comments:
       if count < comment.voter_count:
         count = comment.voter_count
-    
+
     return count
 
   @staticmethod
-  def get_all():
-    return Article.nodes
-
-  @staticmethod
-  def get(uid):
-    return Article.nodes.get_or_none(uid=uid)
-  
-  @staticmethod
   def get_by_title(title):
     return Article.nodes.get_or_none(title=title)
-
-  def __repr__(self):
-    return '<Article({name!r})>'.format(name=self.title)
 
   def update(self, data):
     for name, value in data.items():
