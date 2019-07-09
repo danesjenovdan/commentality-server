@@ -103,7 +103,6 @@ def patch(uid):
     return custom_response(error, 400)
 
   user_id = g.user.get('uid')
-  app.app.logger.info(user_id)
   user = User.get(user_id)
 
   if not article.owner.single().editors.is_connected(user):
@@ -125,7 +124,6 @@ def delete(uid):
     return custom_response({'error': 'article not found'}, 404)
 
   user_id = g.user.get('uid')
-  app.app.logger.info(user_id)
   user = User.get(user_id)
 
   if not article.owner.single().editors.is_connected(user):

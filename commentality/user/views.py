@@ -30,7 +30,6 @@ def get_code():
   #   return custom_response(error, 400)
 
   if req_data['number']:
-    app.app.logger.info('Got number: %s, sending verification code.' % req_data['number']) # TODO remove so number isn't stored in logs
     (verification_code, number) = otp.send_confirmation_code(req_data['number'])
 
     user_in_db = User.get_by_number(number)
@@ -41,8 +40,6 @@ def get_code():
       user = user_in_db
 
   user.code = verification_code
-
-  app.app.logger.info('Saving user:\n%s\n%s\n\n' % (str(user.number), str(user.code)))
 
   user.save()
 
@@ -58,7 +55,6 @@ def verify():
   # if error:
   #   return custom_response(error, 400)
 
-  app.app.logger.info('Getting user:\n%s\n%s\n\n' % (str(req_data['number']), str(req_data['code'])))
   user_by_code = User.get_by_code(str(req_data['code']))
 
   if user_by_code and user_by_code.check_number(req_data['number']):

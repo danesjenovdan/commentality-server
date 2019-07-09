@@ -19,8 +19,6 @@ class Article(StructuredNode):
   def commenters(self):
     commenters = set()
     for comment in self.visible_comments:
-      app.app.logger.info(comment.owner.single().uid)
-
       commenters.add(comment.owner.single().uid)
     return commenters
   

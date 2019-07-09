@@ -34,7 +34,6 @@ class User(StructuredNode):
   def get_by_number(number):
     # TODO stop hardcoding development
     number_hash = hashlib.scrypt(password=str(number).encode('utf-8'), salt=app_config['development'].SECRET_KEY.encode('utf-8'), n=16384, r=8, p=8).hex()
-    app.app.logger.info('I am get_by_number, this is my hash:\n%s\n\n' % str(number_hash))
     return User.nodes.get_or_none(number=number_hash)
 
   @staticmethod
@@ -50,7 +49,6 @@ class User(StructuredNode):
   def check_number(self, number):
     # TODO stop hardcoding development
     number_hash = hashlib.scrypt(password=str(number).encode('utf-8'), salt=app_config['development'].SECRET_KEY.encode('utf-8'), n=16384, r=8, p=8).hex()
-    app.app.logger.info('I am check_number, this is my hash:\n%s\n\n' % str(number_hash))
     return number_hash == self.number
 
   def has_commented_on_article(self, article):
