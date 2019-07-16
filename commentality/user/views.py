@@ -161,7 +161,7 @@ def get_me():
   return custom_response(serialized_user, 200)
 
 @blueprint.route('/my_properties', methods=['GET'])
-@Auth.superuser_required
+@Auth.auth_required
 def get_my_properties():
   user = User.get(g.user.get('uid'))
   media_properties = user.media_properties.all()

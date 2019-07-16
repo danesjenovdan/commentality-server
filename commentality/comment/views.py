@@ -53,9 +53,17 @@ def create():
   return custom_response(data, 201)
 
 @blueprint.route('/', methods=['GET'])
-@Auth.superuser_required
+@Auth.auth_required
 def get_all():
-  comments = Comment.get_all()
+  user_id = g.user.get('uid')
+  user = User.get(user_id)
+
+  if user.is_superuser:
+    comments = Comment.get_all()
+  else:
+    nodes = user.get_accessible_comments()
+    comments = [Comment.inflate(node[0]) for node in nodes]
+
   data = comment_schema.dump(comments, many=True).data
   return custom_response(data, 200)
 
@@ -70,7 +78,7 @@ def get_one(comment_id):
 
 # TODO turn media ownership check into a decorator
 @blueprint.route('/hide/<comment_id>', methods=['POST'])
-@Auth.superuser_required
+@Auth.auth_required
 def hide(comment_id):
   comment = Comment.get(comment_id)
   if not comment:
@@ -95,7 +103,7 @@ def hide(comment_id):
   return custom_response(data, 200)
 
 @blueprint.route('/show/<comment_id>', methods=['POST'])
-@Auth.superuser_required
+@Auth.auth_required
 def show(comment_id):
   comment = Comment.get(comment_id)
   if not comment:

@@ -52,8 +52,21 @@ class User(CommentalityModel):
   def is_editor_on_article(self, article):
     return article.owner.single().editors.is_connected(self)
 
+  def is_editor_on_media_property(self, media_property):
+    return media_property.editors.is_connected(self)
+
   def has_voted_on_all_comments(self, article):
     for comment in article.visible_comments:
       if not comment.voters.is_connected(self):
         return False
     return True
+
+  def get_accessible_comments(self):
+    query = "MATCH (:User) <-[:EDITED_BY]- (:MediaProperty) <-[:OWNED_BY]- (:Article) <-[:POSTED_ON|:HIDDEN_ON]- (matched :Comment) RETURN matched"
+    results, meta = self.cypher(query)
+    return results
+
+  def get_accessible_articles(self):
+    query = "MATCH (:User) <-[:EDITED_BY]- (:MediaProperty) <-[:OWNED_BY]- (matched :Article) RETURN matched"
+    results, meta = self.cypher(query)
+    return results

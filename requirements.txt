@@ -1,8 +1,8 @@
-Flask==1.0.2
+Flask==1.0.3
 Flask-Bcrypt==0.7.1
-Flask-CORS==3.0.7
+Flask-CORS==3.0.8
 ipdb==0.12
 marshmallow==2.19.2
 neomodel==3.3.1
 PyJWT==1.7.1
-twilio==6.26.2
+twilio==6.27.1
