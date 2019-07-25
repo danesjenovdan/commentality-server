@@ -33,7 +33,7 @@ def get_by_title(title):
   article = Article.get_by_title(title)
   if not article:
     return custom_response({'error': 'article not found'}, 404)
-  
+
   # this could be made into an auth decorator (e.g. @Auth.auth_possible)
   token = request.headers.get('api-token')
   data = Auth.decode_token(token)
@@ -42,14 +42,22 @@ def get_by_title(title):
     user = User.get(user_id)
   else:
     user = None
-  
+
   data = article_schema.dump(article).data
   return custom_response(data, 200)
 
 @blueprint.route('/', methods=['GET'])
-@Auth.superuser_required
+@Auth.auth_required
 def get_all():
-  articles =  Article.nodes.all()
+  user_id = g.user.get('uid')
+  user = User.get(user_id)
+
+  if user.is_superuser:
+    articles = Article.nodes.all()
+  else:
+    nodes = user.get_accessible_articles()
+    articles = [Article.inflate(node[0]) for node in nodes]
+
   data = articles_schema.dump(articles).data
   return custom_response(data, 200)
 

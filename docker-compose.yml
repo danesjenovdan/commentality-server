@@ -1,10 +1,11 @@
-version: '3'
+version: '3.7'
 services:
   neo4j:
     restart: always
-    image: neo4j:3.5
+    image: neo4j:3.5.4
     volumes:
       - neo4j-data:/data
+      - ./import:/import
     ports:
       - 7474:7474
       - 7687:7687
@@ -17,6 +18,9 @@ services:
       - FLASK_APP=app:app
       - DATABASE_URL=${DATABASE_URL}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - TWILIO_ACCOUNT_SID=${TWILIO_ACCOUNT_SID}
+      - TWILIO_AUTH_TOKEN=${TWILIO_AUTH_TOKEN}
+      - TWILIO_NUMBER=${TWILIO_NUMBER}
     build: .
     ports:
       - 5000:5000

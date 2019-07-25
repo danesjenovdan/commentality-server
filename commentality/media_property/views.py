@@ -16,14 +16,19 @@ import hashlib
 blueprint = Blueprint('property', __name__)
 
 @blueprint.route('/', methods=['GET'])
-@Auth.superuser_required
+@Auth.auth_required
 def all():
-  properties = media_properties_schema.dump(MediaProperty.get_all())
+  user_id = g.user.get('uid')
+  user = User.get(user_id)
 
-  return custom_response(properties, 200)
+  media_properties = MediaProperty.get_all() if user.is_superuser else user.media_properties
+
+  json = media_properties_schema.dump(media_properties)
+
+  return custom_response(json, 200)
 
 @blueprint.route('/', methods=['POST'])
-@Auth.superuser_required
+@Auth.auth_required
 def create():
   req_data = request.get_json()
   data, error = media_property_schema.load(req_data)
@@ -39,20 +44,26 @@ def create():
   # Connect owner
   owner_id = g.user.get('uid')
   owner = User.get(owner_id)
-  
+
   media_property.editors.connect(owner)
 
   data = media_property_schema.dump(media_property).data
   return custom_response(data, 201)
 
 @blueprint.route('/add_editor/<editor_uid>', methods=['POST'])
-@Auth.superuser_required
+@Auth.auth_required
 def add_editor(editor_uid):
   # get media property
   req_data = request.get_json()
   data, error = media_property_schema.load(req_data)
   if error:
     return custom_response(error, 400)
+
+  user_id = g.user.get('uid')
+  user = User.get(user_id)
+
+  if not user.is_editor_on_media_property() and not user.is_superuser:
+    return custom_response({'error': 'You don\'t have permission to edit this media property.'}, 400)
 
   editor = User.get(editor_uid)
   media_property = MediaProperty.get(data['uid'])

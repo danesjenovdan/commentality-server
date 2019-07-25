@@ -1,0 +1,26 @@
+#!/bin/bash
+
+set -e
+
+
+if [ $1 != "dump" ] && [ $1 !=  "load" ] || [ $# -lt 2 ]; then
+    echo -e "Usage:\n\t\e[3m$0 [load|dump] <filename>\e[0m"
+    exit 1
+fi
+
+if [ $1 == "dump" ]; then
+    DOCKER_USER="--user=$(id -u):$(id -g)"
+    ACTION_MSG="Dumping"
+    COMMAND="--to=/import/$2"
+    SUCCESS_MSG="dumped to"
+else
+    DOCKER_USER=""
+    ACTION_MSG="Loading"
+    COMMAND="--from=/import/$2 --force"
+    SUCCESS_MSG="loaded from"
+fi
+
+echo "$ACTION_MSG database..."
+docker-compose run $DOCKER_USER --no-deps --rm -T neo4j neo4j-admin $1 --database=graph.db $COMMAND
+
+echo "Successfully $SUCCESS_MSG import/$2"

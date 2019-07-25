@@ -3,12 +3,9 @@ from neomodel import (StructuredNode, StringProperty, RelationshipTo,
   RelationshipFrom, UniqueIdProperty, DateTimeProperty, BooleanProperty, One)
 from relations.vote import VoteRelationship
 from relations.comment import CommentRelationship
+from common import CommentalityModel
 
-class Comment(StructuredNode):
-  uid = UniqueIdProperty()
-  created_at = DateTimeProperty(default_now=True)
-  modified_at = DateTimeProperty(default_now=True)
-
+class Comment(CommentalityModel):
   contents = StringProperty(required=True)
   owner = RelationshipTo('user.models.User', 'OWNED_BY', cardinality=One, model=CommentRelationship)
   article = RelationshipTo('article.models.Article', 'POSTED_ON')
@@ -31,17 +28,6 @@ class Comment(StructuredNode):
   @property
   def voter_count(self):
     return len(self.voters)
-
-  @staticmethod
-  def get_all():
-    return Comment.nodes
-
-  @staticmethod
-  def get(uid):
-    return Comment.nodes.get_or_none(uid=uid)
-
-  def __repr__(self):
-    return '<Comment {}>'.format(self.uid)
 
   def update(self, data):
     for name, value in data.items():
