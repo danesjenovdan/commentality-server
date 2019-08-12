@@ -3,9 +3,9 @@ import random
 
 from config import app_config
 
-def send_confirmation_code(to_number):
+def send_confirmation_code(to_number, property_name):
     verification_code = _generate_code()
-    number = _send_sms(to_number, 'Tvoje enkratno geslo za Parlameter je ' + str(verification_code))
+    number = _send_sms(to_number, 'Tvoje enkratno geslo za %s je %s.' % (property_name, str(verification_code)))
     return (verification_code, number)
 
 def _generate_code():

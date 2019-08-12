@@ -11,6 +11,7 @@ class Article(CommentalityModel):
 
   can_vote = BooleanProperty(default=True)
   can_comment = BooleanProperty(default=True)
+  require_login = BooleanProperty(default=True)
 
   @property
   def commenters(self):
