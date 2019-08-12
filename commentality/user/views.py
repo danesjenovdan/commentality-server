@@ -29,16 +29,26 @@ def get_code():
   # if error:
   #   return custom_response(error, 400)
 
-  if req_data['number']:
-    app.app.logger.info('Got number: %s, sending verification code.' % req_data['number']) # TODO remove so number isn't stored in logs
-    (verification_code, number) = otp.send_confirmation_code(req_data['number'])
+  try:
+    if (req_data['number'] and req_data['property_name']):
+      app.app.logger.info('Got number, sending verification code.')
+      (verification_code, number) = otp.send_confirmation_code(req_data['number'], req_data['property_name'])
 
-    user_in_db = User.get_by_number(number)
-    if not user_in_db:
-      user = User()
-      user.set_number(number)
-    else:
-      user = user_in_db
+      user_in_db = User.get_by_number(number)
+      if not user_in_db:
+        user = User()
+        user.set_number(number)
+      else:
+        user = user_in_db
+  except:
+    try:
+      if req_data['property_name']:
+        app.app.logger.info('Creating anonymous user at %s' % req_data['property_name'])
+        user = User()
+        verification_code = '266696682'
+    except:
+      app.app.logger.info('Something went wrong when trying to produce a code for a user.')
+      return custom_response('An error occured. :(', 500)
 
   user.code = verification_code
 
@@ -47,7 +57,7 @@ def get_code():
   user.save()
 
   # Return the number Twilio normalized for us to the user
-  return custom_response(number, 200)
+  return custom_response(user.uid, 200)
 
 @blueprint.route('/verify', methods=['POST'])
 def verify():
@@ -58,11 +68,12 @@ def verify():
   # if error:
   #   return custom_response(error, 400)
 
-  app.app.logger.info('Getting user:\n%s\n%s\n\n' % (str(req_data['number']), str(req_data['code'])))
-  user_by_code = User.get_by_code(str(req_data['code']))
+  app.app.logger.info('Getting user:\n%s\n%s\n\n' % (str(req_data['uid']), str(req_data['code'])))
+  # user_by_code = User.get_by_code(str(req_data['code']))
+  user_by_uid = User.get(req_data['uid'])
 
-  if user_by_code and user_by_code.check_number(req_data['number']):
-    user = user_by_code
+  if user_by_uid and user_by_uid.code == req_data['code']:
+    user = user_by_uid
 
     # destroy code
     user.code = ''

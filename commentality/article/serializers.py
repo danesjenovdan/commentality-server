@@ -14,6 +14,8 @@ class ArticleSchema(Schema):
                                   many=True, exclude=('owner', ), dump_only=True)
   can_vote = fields.Boolean()
   can_comment = fields.Boolean()
+  require_login = fields.Boolean()
+
   commenters = fields.List(fields.String(), dump_only=True)
 
 class AnalizedArticleSchema(Schema):
